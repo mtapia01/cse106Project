@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+</head>
+<body>
+    <h1>Student Dashboard</h1>
+
+    <h2>Your Enrolled Classes</h2>
+    <table>
+        <tr>
+            <th>Class Name</th>
+            <th>Max Capacity</th>
+            <th>Actions</th>
+        </tr>
+        {% for enrollment in student.enrollments %}
+        <tr>
+            <td>{{ enrollment.class.name }}</td>
+            <td>{{ enrollment.class.max_capacity }}</td>
+            <td>
+                <a href="/leave_class/{{ enrollment.id }}">Leave Class</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Available Classes</h2>
+    <table>
+        <tr>
+            <th>Class Name</th>
+            <th>Max Capacity</th>
+            <th>Actions</th>
+        </tr>
+        {% for class in available_classes %}
+        <tr>
+            <td>{{ class.name }}</td>
+            <td>{{ class.max_capacity }}</td>
+            <td>
+                <a href="/join_class/{{ class.id }}">Join Class</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

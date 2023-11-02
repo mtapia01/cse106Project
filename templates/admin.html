@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+
+    <h2>Create a New Class</h2>
+    <form method="POST" action="/create_class">
+        <label for="class_name">Class Name:</label>
+        <input type="text" name="class_name" required>
+        <label for="teacher_id">Teacher ID:</label>
+        <input type="text" name="teacher_id" required>
+        <label for="max_capacity">Max Capacity:</label>
+        <input type="number" name="max_capacity" required>
+        <button type="submit">Create Class</button>
+    </form>
+
+    <h2>Classes</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Class Name</th>
+            <th>Teacher ID</th>
+            <th>Max Capacity</th>
+            <th>Actions</th>
+        </tr>
+        {% for class in classes %}
+        <tr>
+            <td>{{ class.id }}</td>
+            <td>{{ class.name }}</td>
+            <td>{{ class.teacher_id }}</td>
+            <td>{{ class.max_capacity }}</td>
+            <td>
+                <a href="/edit_class/{{ class.id }}">Edit</a>
+                <a href="/delete_class/{{ class.id }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
