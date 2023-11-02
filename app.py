@@ -61,6 +61,14 @@ def teacher():
     # Implement teacher functionality here
     return render_template('teacher.html')
 
+@app.route('/teacher/classes')
+def teacher_classes():
+    if 'user_id' in session and session['user_type'] == 2:  # Ensure the user is a teacher (user type 2)
+        instructor_id = session['user_id']
+        classes = Classes.query.filter_by(Instructor=instructor_id).all()
+        return render_template('teacher_classes.html', classes=classes)
+
+
 
 @app.route('/admin')
 def admin():
