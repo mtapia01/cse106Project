@@ -15,7 +15,7 @@ CORS(app)
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///grades.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Users.db'
 
 db = SQLAlchemy(app)
 
@@ -23,13 +23,15 @@ db = SQLAlchemy(app)
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), unique=True, nullable=False)
     type = db.Column(db.String(7), nullable=False)
 
 #idk how but we also need to store classes into this table
-class Student(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    #classes = db.Column()
+# class Student(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), unique=True, nullable=False)
+#     password = db.Column(db.String(100), unique=True, nullable=False)
+#     #classes = db.Column()
     
 with app.app_context():
     db.create_all()
@@ -39,7 +41,18 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
-
+@app.route('/user', methods=['POST'])
+def create_student():
+    if request.method == 'POST':
+        requestStudent = request.get_json()
+        newStudent = Users(name=requestStudent['name'], password=requestStudent['password'], type=requestStudent['type'])
+        db.session.add(newStudent)
+        db.session.commit()
+        # jsonify({'message': 'Student added'}), 200
+        return jsonify({'message': 'Student created successfully'})
+    else:
+        return jsonify({'error': 'Invalid request'})
+    
 
 
 if __name__ == '__main__':
