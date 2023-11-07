@@ -12,6 +12,7 @@
 </head>
 
 <body class="font mainBackground">
+    <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
     <div id="rcorners1" class="center">
         <p>Student Login</p>
         <div id="rcorners2" class="center">
@@ -24,6 +25,7 @@
         <br /><br />
         <button id="loginBtn" class="button button1" onclick="userLogin()">Login</button>
         <button id="signupBtn" class="button button1" onclick="postStudent()">Sign Up</button>
+        
     </div>
     <!-- <script src="/Lab 6/static/main.js"></script> -->
     <script src="{{ url_for('static', filename='main.js') }}"></script>
