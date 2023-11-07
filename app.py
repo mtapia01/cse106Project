@@ -46,22 +46,12 @@ def load_user(user_id):
 def display_registration():
     return render_template('registration.html')
 
-
-
 #id = table organization Name = student/admin/teacher's name type = student/admin/teacher
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=False, nullable=False)
     password = db.Column(db.String(100), unique=True, nullable=False)
     type = db.Column(db.String(7), nullable=False)
-
-#idk how but we also need to store classes into this table
-# class Student(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), unique=True, nullable=False)
-#     password = db.Column(db.String(100), unique=True, nullable=False)
-#     #classes = db.Column()
-
 
 @app.route('/', methods=['GET'])
 def display_login():
@@ -82,6 +72,27 @@ def teacher():
     # Implement teacher functionality here
     return render_template('teacher.html')
 
+
+@app.route('/stuCourses', methods=['GET'])
+def stuCourses():
+    requestStudent = request.get_json()
+    user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+
+    # After finding the user we use their ID to see ALL courses they are enrolled in
+    if user:
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'password': user.password,
+            'type': user.type
+            # Add other fields here
+        }
+        Enrollment.query.filter_by(student_id=user_data['id']).all()
+        classListEnrolled = []
+        classListEnrolled.append(user_data)
+        return jsonify(classListEnrolled)
+    else:
+        return jsonify({'error': 'Invalid request'})
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
@@ -122,19 +133,6 @@ def userLogin():
             return jsonify({'error': 'User not found'}), 404
     else:
         return jsonify({'error': 'Invalid request method'}), 405
-    
-    #     student = Users.query.filter_by(name=userName).first()
-    #     if student:
-    #         checkpassword = Users.query.filter_by(password=password).first()
-    #         if checkpassword:
-    #             return jsonify({'message': 'You have loged in'}),200 
-    #         else:
-    #             jsonify({'error': 'Wrong password'})
-    #     else:
-    #         jsonify({'error': 'Invalid username or password'})
-    #     # return jsonify({'message': 'Student created successfully'})
-    # else:
-    #     return jsonify({'error': 'Invalid request'}), 404
 
 @app.route('/allusers', methods=['GET'])
 def allUsers():

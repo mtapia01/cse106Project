@@ -27,7 +27,26 @@
         <button id="signupBtn" class="button button1" onclick="postStudent()">Sign Up</button>
         
     </div>
-    <!-- <script src="/Lab 6/static/main.js"></script> -->
+    <div id="postSignIn" class="hide">
+        <div class="center">
+            <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
+            <br />
+            <button class="button button1">See All Courses</button>
+            <br />
+            <button class="button button1">Register For Courses</button>
+        </div>
+
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
+          <div id="resultAll">
+
+          </div>
+        </div>
+      </div>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 
 </body>

@@ -1,30 +1,3 @@
-// function userLogin(){
-//     let studName = document.getElementById("stuName").value;
-//     const studPass = document.getElementById("stuPass").value;
-
-//     const xmlhttp = new XMLHttpRequest();
-//     const method = 'GET';
-//     const url = 'http://127.0.0.1:5000/userLogin/${studName}${studPass}';
-
-//     xmlhttp.open(method, url, true);
-//     xmlhttp.send();
-//     xmlhttp.onload = function () {
-//         let loginDiv = document.getElementById("rcorners1");
-//         let loginBtn = document.getElementById("loginBtn");
-//         let signUpBtn = document.getElementById("signupBtn");
-//         if(response.ok){
-//             loginDiv.classList.add("hide");
-//             loginDiv.classList.add("hide");
-//             signUpBtn.classList.add("hide");
-//             loginBtn.classList.add("hide")
-//         } else{
-//             console.log(response.json())
-//             // console.error('Error:', error);
-//             alert(error)
-//         }
-//     };
-// }
-
 function signout(){
 
     // Clear any stored authentication data (e.g., tokens, session data, cookies)
@@ -54,12 +27,17 @@ function userLogin() {
             let loginDiv = document.getElementById("rcorners1");
             let loginBtn = document.getElementById("loginBtn");
             let signUpBtn = document.getElementById("signupBtn");
+            let studentFunction = document.getElementById("postSignIn");
             loginDiv.classList.add("hide");
             loginBtn.classList.add("hide");
             signUpBtn.classList.add("hide");
+
             logOutBtn.classList.remove("hide");
             logOutBtn.classList.add("button");
             logOutBtn.classList.add("button1");
+
+            studentFunction.classList.remove("hide");
+
         } else {
             alert("Login failed. Please check your credentials.");
         }
@@ -68,13 +46,44 @@ function userLogin() {
     xmlhttp.onerror = function() {
         alert("There was an error during the login process.");
     };
-
-    // Prepare and send the request
-    // const data = JSON.stringify({ "name": studName, "password": studPass });
-    // xmlhttp.send(data);
     xmlhttp.send(JSON.stringify(data));
 }
 
+function openMyCourses(){
+
+    document.getElementById("myModal").style.display = "block"; // Show the modal
+    const resultDiv = document.getElementById("resultAll");
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'GET';
+    const url = 'http://127.0.0.1:5000/stuCourses';
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
+    xmlhttp.onload = function () {
+
+        // Create an HTML table
+        let tableHTML = '<table border="1">';
+        tableHTML += '<tr><th>Name</th><th>Grade</th></tr>';
+
+        classList = JSON.parse(xmlhttp.response);
+
+        for (let i = 0; i < classList.length; i++) {
+            let person = classList[i].key;
+            let grade = classList[i].value;
+
+            // Creating table rows
+            tableHTML += `<tr><td>${person}</td><td>${grade}</td></tr>`;
+        }
+        tableHTML += '</table>';
+        resultDiv.innerHTML = tableHTML;
+        // let hideBtn = document.getElementById("hideGrades");
+        // hideBtn.classList.remove("hide");
+    }
+      
+      
+}
+function closeMyCourses() {
+    document.getElementById("myModal").style.display = "none"; // Hide the modal
+  }
 async function postStudent(){
     const name = document.getElementById("stuName").value;
     const pass = document.getElementById("stuPass").value;
