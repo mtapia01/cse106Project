@@ -7,13 +7,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title></title>
     <!-- <link rel="stylesheet" href="/Lab 6/static/css/styles.css"> -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
 </head>
 
 <body class="font mainBackground">
-    
-    <!-- <script src="/Lab 6/static/main.js"></script> -->
+    <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
+    <div id="rcorners1" class="center">
+        <p>Student Login</p>
+        <div id="rcorners2" class="center">
+            <p>Name</p>
+            <input id="stuName" placeholder="Name...">
+            <p>Password</p>
+            <input id="stuPass" class="center" placeholder="Password..." type="secret">
+            <br /><br />
+        </div> 
+        <br /><br />
+        <button id="loginBtn" class="button button1" onclick="userLogin()">Login</button>
+        <button id="signupBtn" class="button button1" onclick="postStudent()">Sign Up</button>
+        
+    </div>
+    <div id="postSignIn" class="hide">
+        <div class="center">
+            <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
+            <br />
+            <button class="button button1">See All Courses</button>
+            <br />
+            <button class="button button1">Register For Courses</button>
+        </div>
+
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
+          <div id="resultAll">
+
+          </div>
+        </div>
+      </div>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 
 </body>
