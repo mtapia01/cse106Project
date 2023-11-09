@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'  # Use SQLite as an example database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Users.db'  # Use SQLite as an example database
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -45,25 +46,16 @@ def load_user(user_id):
 def display_registration():
     return render_template('registration.html')
 
-
 #id = table organization Name = student/admin/teacher's name type = student/admin/teacher
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), unique=False, nullable=False)
     password = db.Column(db.String(100), unique=True, nullable=False)
     type = db.Column(db.String(7), nullable=False)
 
-#idk how but we also need to store classes into this table
-# class Student(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), unique=True, nullable=False)
-#     password = db.Column(db.String(100), unique=True, nullable=False)
-#     #classes = db.Column()
-
-
 @app.route('/', methods=['GET'])
 def display_login():
-    return render_template('login.html')
+    return render_template('index.html')
 
 @app.route('/')
 def index():
@@ -80,6 +72,57 @@ def teacher():
     # Implement teacher functionality here
     return render_template('teacher.html')
 
+
+@app.route('/stuCourses', methods=['GET'])
+def stuCourses():
+    requestStudent = request.get_json()
+    user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+
+    # After finding the user we use their ID to see ALL courses they are enrolled in
+    if user:
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'password': user.password,
+            'type': user.type
+            # Add other fields here
+        }
+        Enrollment.query.filter_by(student_id=user_data['id']).all()
+        classListEnrolled = []
+        classListEnrolled.append(user_data)
+        return jsonify(classListEnrolled)
+    else:
+        return jsonify({'error': 'Invalid request'})
+
+@app.route('/schoolCourses', methods=['GET'])
+def schoolCourses():
+    # requestStudent = request.get_json()
+    # user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+
+    # After finding the user we use their ID to see ALL courses they are enrolled in
+    # if user:
+    #     user_data = {
+    #         'id': user.id,
+    #         'name': user.name,
+    #         'password': user.password,
+    #         'type': user.type
+    #         # Add other fields here
+    #     }
+        # Enrollment.query.filter_by(student_id=user_data['id']).all()
+        Class.query.all()
+        # classListEnrolled = []
+        # classListEnrolled.append(user_data)
+        return jsonify(Class.query.all())
+    # else:
+        # return jsonify({'error': 'Invalid request'})
+
+@app.route('/signout', methods=['GET'])
+def user_signout():
+    # Clear session data
+    session.clear()
+    # Redirect the user to the sign-in page or homepage
+    return redirect('/')  # Redirect to the sign-in page
+
 @app.route('/user', methods=['POST'])
 def create_student():
     if request.method == 'POST':
@@ -91,7 +134,44 @@ def create_student():
         return jsonify({'message': 'Student created successfully'})
     else:
         return jsonify({'error': 'Invalid request'})
-    
+# @app.route('/grades/<name>', methods=['GET'])
+@app.route('/userLogin', methods=['POST'])
+def userLogin():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username')  # Assuming the username is in the JSON data
+        password = data.get('password')
+
+        if not username or not password:
+            return jsonify({'error': 'Please provide both username and password'}), 400
+
+        user = Users.query.filter_by(name=username).first()
+        if user:
+            if user.password == password:  # Check if the passwords match
+                return jsonify({'message': 'You have logged in'}), 200
+            else:
+                return jsonify({'error': 'Incorrect password'}), 401
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        return jsonify({'error': 'Invalid request method'}), 405
+
+@app.route('/allusers', methods=['GET'])
+def allUsers():
+    users = Users.query.all()
+    classList = []
+
+    for user in users:
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'password': user.password,
+            'type': user.type
+            # Add other fields here
+        }
+        classList.append(user_data)
+
+    return jsonify(classList)
 
 
 
