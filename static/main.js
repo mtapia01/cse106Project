@@ -1,19 +1,17 @@
-function signout(){
-
+function signout() {
     // Clear any stored authentication data (e.g., tokens, session data, cookies)
     // For instance, if using tokens:
     localStorage.removeItem('authToken'); // Remove token from local storage
 
     // Redirect the user to the sign-in page or homepage
     window.location.href = "/"; // Redirect to the sign-in page
-
 }
 
 function userLogin() {
     let studName = document.getElementById("stuName").value;
     const studPass = document.getElementById("stuPass").value;
 
-    const data = {"username": studName, "password": studPass};
+    const data = { "name": studName, "password": studPass };
 
     const xmlhttp = new XMLHttpRequest();
     const method = 'POST'; // Considering this should be a POST request for login
@@ -32,25 +30,24 @@ function userLogin() {
             loginBtn.classList.add("hide");
             signUpBtn.classList.add("hide");
 
+            // Assuming you have a variable logOutBtn defined somewhere in your code
             logOutBtn.classList.remove("hide");
             logOutBtn.classList.add("button");
             logOutBtn.classList.add("button1");
 
             studentFunction.classList.remove("hide");
-
         } else {
             alert("Login failed. Please check your credentials.");
         }
     };
 
-    xmlhttp.onerror = function() {
+    xmlhttp.onerror = function () {
         alert("There was an error during the login process.");
     };
     xmlhttp.send(JSON.stringify(data));
 }
 
-function openMyCourses(){
-
+function openMyCourses() {
     document.getElementById("myModal").style.display = "block"; // Show the modal
     const resultDiv = document.getElementById("resultAll");
     const xmlhttp = new XMLHttpRequest();
@@ -64,7 +61,7 @@ function openMyCourses(){
         let tableHTML = '<table border="1">';
         tableHTML += '<tr><th>Name</th><th>Grade</th></tr>';
 
-        classList = JSON.parse(xmlhttp.response);
+        const classList = JSON.parse(xmlhttp.response);
 
         for (let i = 0; i < classList.length; i++) {
             let person = classList[i].key;
@@ -75,39 +72,32 @@ function openMyCourses(){
         }
         tableHTML += '</table>';
         resultDiv.innerHTML = tableHTML;
-        // let hideBtn = document.getElementById("hideGrades");
-        // hideBtn.classList.remove("hide");
     }
-      
-      
 }
+
 function closeMyCourses() {
     document.getElementById("myModal").style.display = "none"; // Hide the modal
-  }
-async function postStudent(){
-    const name = document.getElementById("stuName").value;
-    const pass = document.getElementById("stuPass").value;
-    const type = "student"
+}
 
-    const data = {name: name, password: pass, type: type};
+async function postStudent() {
+    const username = document.getElementById("stuName").value;
+    const pass = document.getElementById("stuPass").value;
+    const type = 1;
+
+    const data = { username: username, password: pass, type: type };
 
     fetch('http://127.0.0.1:5000/user', {
         method: 'POST',
         headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
     })
-    .then((response) => {
-        console.log(response);
-        // console.log('Success:', response.json());
-        console.log(response.json())
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Successfully added ${name} to the table!`;
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Could not add ${name} to the table`;
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
