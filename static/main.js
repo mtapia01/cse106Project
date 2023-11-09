@@ -47,7 +47,6 @@ function userLogin() {
     xmlhttp.send(JSON.stringify(data));
 }
 
-function openMyCourses() {
 //might work need data to test
 function openAllCourses(){
     document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
@@ -130,19 +129,6 @@ async function postStudent() {
         .catch(error => {
             console.error('Error:', error);
         });
-}
-    .then((response) => {
-        console.log(response);
-        // console.log('Success:', response.json());
-        console.log(response.json())
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Successfully added ${name} to the table!`;
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Could not add ${name} to the table`;
-    });
 }
 
 function teacherLogin(){}
