@@ -8,7 +8,6 @@ function signout(){
     window.location.href = "/"; // Redirect to the sign-in page
 
 }
-
 function userLogin() {
     let studName = document.getElementById("stuName").value;
     const studPass = document.getElementById("stuPass").value;
@@ -16,11 +15,11 @@ function userLogin() {
     const data = {"username": studName, "password": studPass};
 
     const xmlhttp = new XMLHttpRequest();
-    const method = 'POST'; // Considering this should be a POST request for login
-    const url = 'http://127.0.0.1:5000/userLogin'; // Assuming this is the login endpoint
+    const method = 'POST';
+    const url = 'http://127.0.0.1:5000/userLogin';
 
     xmlhttp.open(method, url, true);
-    xmlhttp.setRequestHeader("Content-Type", "application/json"); // Setting the request header
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
 
     xmlhttp.onload = function () {
         if (xmlhttp.status === 200) {
@@ -28,6 +27,10 @@ function userLogin() {
             let loginBtn = document.getElementById("loginBtn");
             let signUpBtn = document.getElementById("signupBtn");
             let studentFunction = document.getElementById("postSignIn");
+
+            // Assuming the server sends the user role information in the response
+            let userRole = JSON.parse(xmlhttp.responseText).type;
+
             loginDiv.classList.add("hide");
             loginBtn.classList.add("hide");
             signUpBtn.classList.add("hide");
@@ -36,8 +39,16 @@ function userLogin() {
             logOutBtn.classList.add("button");
             logOutBtn.classList.add("button1");
 
-            studentFunction.classList.remove("hide");
+            // Redirect to the appropriate dashboard based on the user role
+            if (userRole === 'student') {
+                window.location.href = "/student-dashboard";
+            } else if (userRole === 'teacher') {
+                window.location.href = "/teacher-dashboard";
+            } else if (userRole === 'admin') {
+                window.location.href = "/admin-dashboard";
+            }
 
+            studentFunction.classList.remove("hide");
         } else {
             alert("Login failed. Please check your credentials.");
         }
@@ -48,6 +59,7 @@ function userLogin() {
     };
     xmlhttp.send(JSON.stringify(data));
 }
+
 
 function openMyCourses(){
 

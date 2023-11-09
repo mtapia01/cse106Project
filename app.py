@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Users.db'  # Use SQLite as an example database
 db = SQLAlchemy(app)
@@ -40,7 +39,15 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def create_admin_user():
+    admin_exists = User.query.filter_by(type='admin').first()
 
+    if not admin_exists:
+        # If admin user doesn't exist, create one
+        admin_user = User(name='admin', password='admin1', type='admin')
+        db.session.add(admin_user)
+        db.session.commit()
+        print('Admin user created successfully.')
 
 @app.route('/register', methods=['GET'])
 def display_registration():
@@ -195,3 +202,26 @@ def register():
 
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
+
+@app.route('/student-dashboard')
+def student_dashboard():
+    return render_template('student.html')
+
+@app.route('/teacher-dashboard')
+def teacher_dashboard():
+    return render_template('teacher.html')
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    return render_template('admin.html')
+
+
+if __name__ == '__main__':
+    # Create the database tables
+    db.create_all()
+
+    # Create the admin user
+    create_admin_user()
+
+    # Run the application
+    app.run(debug=True)
