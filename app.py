@@ -89,27 +89,27 @@ def stuCourses():
     else:
         return jsonify({'error': 'Invalid request'})
 
-@app.route('/schoolCourses', methods=['GET'])
-def schoolCourses():
-    # requestStudent = request.get_json()
-    # user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+# @app.route('/schoolCourses', methods=['GET'])
+# def schoolCourses():
+#     # requestStudent = request.get_json()
+#     # user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
 
-    # After finding the user we use their ID to see ALL courses they are enrolled in
-    # if user:
-    #     user_data = {
-    #         'id': user.id,
-    #         'name': user.name,
-    #         'password': user.password,
-    #         'type': user.type
-    #         # Add other fields here
-    #     }
-        # Enrollment.query.filter_by(student_id=user_data['id']).all()
-        Class.query.all()
-        # classListEnrolled = []
-        # classListEnrolled.append(user_data)
-        return jsonify(Class.query.all())
-    # else:
-        # return jsonify({'error': 'Invalid request'})
+#     # After finding the user we use their ID to see ALL courses they are enrolled in
+#     # if user:
+#     #     user_data = {
+#     #         'id': user.id,
+#     #         'name': user.name,
+#     #         'password': user.password,
+#     #         'type': user.type
+#     #         # Add other fields here
+#     #     }
+#         # Enrollment.query.filter_by(student_id=user_data['id']).all()
+#         Class.query.all()
+#         # classListEnrolled = []
+#         # classListEnrolled.append(user_data)
+#         return jsonify(Class.query.all())
+#     # else:
+#         # return jsonify({'error': 'Invalid request'})
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
