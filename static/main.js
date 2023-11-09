@@ -49,6 +49,35 @@ function userLogin() {
     xmlhttp.send(JSON.stringify(data));
 }
 
+//might work need data to test
+function openAllCourses(){
+    document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
+    const resultDiv = document.getElementById("resultAllCourses");
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'GET';
+    const url = 'http://127.0.0.1:5000/schoolCourses ';
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
+    xmlhttp.onload = function () {
+
+        // Create an HTML table
+        let tableHTML = '<table border="1">';
+        tableHTML += '<tr><th>Course</th><th>Seats</th></tr>';
+
+        classList = JSON.parse(xmlhttp.response);
+
+        for (let i = 0; i < classList.length; i++) {
+            let course = classList[i].key;
+            let seats = classList[i].value;
+
+            // Creating table rows
+            tableHTML += `<tr><td>${course}</td><td>${seats}</td></tr>`;
+        }
+        tableHTML += '</table>';
+        resultDiv.innerHTML = tableHTML;
+    }
+}
+
 function openMyCourses(){
 
     document.getElementById("myModal").style.display = "block"; // Show the modal
@@ -111,3 +140,6 @@ async function postStudent(){
         // resultDiv.innerHTML = `Could not add ${name} to the table`;
     });
 }
+
+function teacherLogin(){}
+function postTeacher(){}
