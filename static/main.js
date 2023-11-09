@@ -84,30 +84,34 @@ function openMyCourses(){
 function closeMyCourses() {
     document.getElementById("myModal").style.display = "none"; // Hide the modal
   }
-async function postStudent(){
+  function postStudent() {
     const name = document.getElementById("stuName").value;
     const pass = document.getElementById("stuPass").value;
-    const type = "student"
+    const type = "student";
 
-    const data = {name: name, password: pass, type: type};
+    const data = { name: name, password: pass, type: type };
 
     fetch('http://127.0.0.1:5000/user', {
         method: 'POST',
         headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
     })
-    .then((response) => {
-        console.log(response);
-        // console.log('Success:', response.json());
-        console.log(response.json())
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Successfully added ${name} to the table!`;
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        // const resultDiv = document.getElementById("postResult");
-        // resultDiv.innerHTML = `Could not add ${name} to the table`;
-    });
+        .then((response) => {
+            if (response.ok) {
+                // Show a success message in a modal or an alert
+                alert("Registration successful! You can now log in.");
+                // Redirect the user to the login page
+                window.location.href = "/";
+            } else {
+                // Show an error message if registration fails
+                alert("Registration failed. Please try again.");
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            // Show an error message if there is an issue with the request
+            alert("There was an error during the registration process.");
+        });
 }

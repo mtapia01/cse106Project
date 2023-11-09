@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-import jsonify
 
 
 app = Flask(__name__)
@@ -54,21 +53,6 @@ class Users(db.Model):
     password = db.Column(db.String(100), unique=True, nullable=False)
     type = db.Column(db.String(7), nullable=False)
 
-#id = table organization Name = student/admin/teacher's name type = student/admin/teacher
-class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), unique=True, nullable=False)
-    type = db.Column(db.String(7), nullable=False)
-
-#idk how but we also need to store classes into this table
-# class Student(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), unique=True, nullable=False)
-#     password = db.Column(db.String(100), unique=True, nullable=False)
-#     #classes = db.Column()
-
-
 @app.route('/', methods=['GET'])
 def display_login():
     return render_template('index.html')
@@ -87,20 +71,6 @@ def student():
 def teacher():
     # Implement teacher functionality here
     return render_template('teacher.html')
-
-@app.route('/user', methods=['POST'])
-def create_student():
-    if request.method == 'POST':
-        requestStudent = request.get_json()
-        newStudent = Users(name=requestStudent['name'], password=requestStudent['password'], type=requestStudent['type'])
-        db.session.add(newStudent)
-        db.session.commit()
-        # jsonify({'message': 'Student added'}), 200
-        return jsonify({'message': 'Student created successfully'})
-    else:
-        return jsonify({'error': 'Invalid request'})
-    
-
 
 
 @app.route('/stuCourses', methods=['GET'])
@@ -225,4 +195,3 @@ def register():
 
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
-
