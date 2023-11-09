@@ -122,7 +122,7 @@ def user_signout():
 def create_student():
     if request.method == 'POST':
         requestStudent = request.get_json()
-        newStudent = Users(FirstLastName=requestStudent['name'], Password=requestStudent['password'], Type=requestStudent['type'])
+        newStudent = Users(FirstLastName=requestStudent['username'], Password=requestStudent['password'], Type=requestStudent['type'])
         db.session.add(newStudent)
         db.session.commit()
         # jsonify({'message': 'Student added'}), 200
