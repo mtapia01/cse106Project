@@ -48,33 +48,37 @@ function userLogin() {
 }
 
 //might work need data to test
-function openAllCourses(){
+function openAllCourses() {
     document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
     const resultDiv = document.getElementById("resultAllCourses");
     const xmlhttp = new XMLHttpRequest();
     const method = 'GET';
-    const url = 'http://127.0.0.1:5000/schoolCourses ';
+    const url = 'http://127.0.0.1:5000/schoolCourses';
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            // Parse the JSON response
+            const classList = JSON.parse(xmlhttp.responseText);
+
+            // Create an HTML table
+            let tableHTML = '<table border="1">';
+            tableHTML += '<tr><th>Class ID</th><th>Class Name</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th></tr>';
+
+            for (let i = 0; i < classList.length; i++) {
+                let classData = classList[i];
+
+                // Creating table rows
+                tableHTML += `<tr><td>${classData.ClassID}</td><td>${classData.ClassName}</td><td>${classData.Instructor}</td><td>${classData.MeetingTime}</td><td>${classData.EnrolledStudents}</td><td>${classData.MaxStudents}</td></tr>`;
+            }
+            tableHTML += '</table>';
+            resultDiv.innerHTML = tableHTML;
+        }
+    };
+
     xmlhttp.open(method, url, true);
     xmlhttp.send();
-    xmlhttp.onload = function () {
-
-        // Create an HTML table
-        let tableHTML = '<table border="1">';
-        tableHTML += '<tr><th>Course</th><th>Seats</th></tr>';
-
-        classList = JSON.parse(xmlhttp.response);
-
-        for (let i = 0; i < classList.length; i++) {
-            let course = classList[i].key;
-            let seats = classList[i].value;
-
-            // Creating table rows
-            tableHTML += `<tr><td>${course}</td><td>${seats}</td></tr>`;
-        }
-        tableHTML += '</table>';
-        resultDiv.innerHTML = tableHTML;
-    }
 }
+
 
 function openMyCourses(){
     document.getElementById("myModal").style.display = "block"; // Show the modal
@@ -106,6 +110,7 @@ function openMyCourses(){
 
 function closeMyCourses() {
     document.getElementById("myModal").style.display = "none"; // Hide the modal
+    document.getElementById("allCoursesModal").style.display = "none";
 }
 
 async function postStudent() {
