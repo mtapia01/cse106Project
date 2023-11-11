@@ -18,15 +18,28 @@ class Users(db.Model, UserMixin):
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
     ClassName = db.Column(db.String(80), nullable=False)
-    Instructor = db.Column(db.Integer, db.ForeignKey('users.id'))
+    Instructor = db.Column(db.Integer, db.ForeignKey('users.FirstLastName'))
     MeetingTime = db.Column(db.String(80), nullable=True)
     EnrolledStudents = db.Column(db.Integer)
     MaxStudents = db.Column(db.Integer)
+    
+    def to_dict(self):
+        return {
+            'ClassID': self.ClassID,
+            'ClassName': self.ClassName,
+            'Instructor': self.Instructor,
+            'MeetingTime': self.MeetingTime,
+            'EnrolledStudents': self.EnrolledStudents,
+            'MaxStudents': self.MaxStudents
+        }
 
 class CourseRegistration(db.Model):
-    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.id'))
-    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.id'))
+    __tablename__ = 'CourseRegistration'  # Specify the correct table name
+    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.UserId'))
+    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.ClassID'))
     Grade = db.Column(db.Float, nullable=True)
+    RegistrationID = db.Column(db.Integer, primary_key=True)
+    
 
 # Create the database tables
 #db.create_all()
@@ -36,7 +49,6 @@ class CourseRegistration(db.Model):
 login_manager = LoginManager()
 login_manager.login_view = 'login'  # The login route's name
 login_manager.init_app(app)
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -74,50 +86,110 @@ def teacher():
 #         classes = Classes.query.filter_by(Instructor=instructor_id).all()
 #         return render_template('teacher_classes.html', classes=classes)
 
-
-
 @app.route('/stuCourses', methods=['GET'])
 def stuCourses():
-    requestStudent = request.get_json()
-    user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+    username = request.args.get('name')
+    
+    # After finding the user, use their ID to fetch ALL courses they are enrolled in
+    user = Users.query.filter_by(FirstLastName=username).first()
 
-    # After finding the user we use their ID to see ALL courses they are enrolled in
     if user:
-        user_data = {
-            'id': user.id,
-            'name': user.name,
-            'password': user.password,
-            'type': user.type
-            # Add other fields here
-        }
-        CourseRegistration.query.filter_by(student_id=user_data['id']).all()
+        # Fetch the courses enrolled by the user
+        enrolled_courses = CourseRegistration.query.filter_by(UserIdFK=user.UserId).all()
+
+        # Create a list to store the courses
         classListEnrolled = []
-        classListEnrolled.append(user_data)
+
+        # Iterate through the enrolled courses and add course information to the list
+        for enrollment in enrolled_courses:
+            # Use the correct attribute from the CourseRegistration model
+            class_id = enrollment.ClassIDFK
+
+            course = Classes.query.filter_by(ClassID=class_id).first()
+
+            if course:
+                classListEnrolled.append({
+                    'course_name': course.ClassName,
+                    'grade': enrollment.Grade,
+                    'class_id': class_id  # Add the class_id to the response
+                })
+            else:
+                # Handle the case where the course information is not found
+                classListEnrolled.append({
+                    'error': 'Course information not found',
+                    'grade': enrollment.Grade,
+                    'class_id': class_id  # Add the class_id to the response even if not found
+                })
+
         return jsonify(classListEnrolled)
     else:
-        return jsonify({'error': 'Invalid request'})
+        return jsonify({'error': 'Invalid user'})
+
 
 @app.route('/schoolCourses', methods=['GET'])
 def schoolCourses():
-    requestStudent = request.get_json()
-    user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+    if request.method == 'GET':
+        classes = Classes.query.all()
+        classes_list = [cls.to_dict() for cls in classes]
+        return jsonify(classes_list)
+    
+@app.route('/registerClass', methods=['POST'])
+def courseRegister():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('user_id')
 
-    #After finding the user we use their ID to see ALL courses they are enrolled in
+        user_id = Users.query.filter_by(FirstLastName=username).first().UserId
+        class_id = data.get('class_id')  # Assuming 'class_id' is sent in the JSON payload
+
+        # Check if the user is already registered for the class
+        existing_registration = CourseRegistration.query.filter_by(UserIdFK=user_id, ClassIDFK=class_id).first()
+
+        if existing_registration:
+            # If the user is already registered, remove the registration (deregister)
+            db.session.delete(existing_registration)
+
+            # Decrement the EnrolledStudents count in the Classes table
+            target_class = Classes.query.get(class_id)
+            if target_class and target_class.EnrolledStudents > 0:
+                target_class.EnrolledStudents -= 1
+
+            db.session.commit()
+            return jsonify({'status': 'deregistered'})
+        else:
+            # If the user is not registered, create a new registration
+            new_registration = CourseRegistration(UserIdFK=user_id, ClassIDFK=class_id, Grade=100)
+            db.session.add(new_registration)
+
+            # Increment the EnrolledStudents count in the Classes table
+            target_class = Classes.query.get(class_id)
+            if target_class:
+                target_class.EnrolledStudents += 1
+
+            db.session.commit()
+            return jsonify({'status': 'registered'})
+
+@app.route('/deregisterCourse', methods=['POST'])
+def deregisterCourse():
+    data = request.get_json()
+    class_id = data.get('class_id')
+    name = data.get('name')
+    
+
+    user = Users.query.filter_by(FirstLastName=name).first()
     if user:
-        user_data = {
-            'id': user.id,
-            'name': user.name,
-            'password': user.password,
-            'type': user.type
-            # Add other fields here
-        }
-        CourseRegistration.query.filter_by(student_id=user_data['id']).all()
-        Classes.query.all()
-        classListEnrolled = []
-        classListEnrolled.append(user_data)
-        return jsonify(Classes.query.all())
-    else:
-        return jsonify({'error': 'Invalid request'})
+        registration = CourseRegistration.query.filter_by(UserIdFK=user.UserId, ClassIDFK=class_id).first()
+        if registration:
+            target_class = Classes.query.get(class_id)
+            if target_class and target_class.EnrolledStudents > 0:
+                target_class.EnrolledStudents -= 1
+
+            db.session.delete(registration)
+            db.session.commit()
+            return jsonify({'status': 'success'})
+    
+    return jsonify({'status': 'error'})
+
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
@@ -130,19 +202,25 @@ def user_signout():
 def create_student():
     if request.method == 'POST':
         requestStudent = request.get_json()
-        newStudent = Users(FirstLastName=requestStudent['name'], Password=requestStudent['password'], Type=requestStudent['type'])
-        db.session.add(newStudent)
-        db.session.commit()
-        # jsonify({'message': 'Student added'}), 200
-        return jsonify({'message': 'Student created successfully'})
+        
+        registration = Users.query.filter_by(FirstLastName=requestStudent['username']).first()
+
+        if registration:
+            return jsonify({'error': 'User Already Exists'})
+        else:
+            newStudent = Users(FirstLastName=requestStudent['username'], Password=requestStudent['password'], Type=requestStudent['type'])
+            db.session.add(newStudent)
+            db.session.commit()
+            return jsonify({'message': 'Student created successfully'})
     else:
         return jsonify({'error': 'Invalid request'})
+    
 # @app.route('/grades/<name>', methods=['GET'])
 @app.route('/userLogin', methods=['POST'])
 def userLogin():
     if request.method == 'POST':
         data = request.get_json()
-        username = data.get('name')  # Use the correct field name
+        username = data.get('name')
         password = data.get('password')
 
         if not username or not password:
@@ -221,4 +299,3 @@ def register():
 
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
-

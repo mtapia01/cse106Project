@@ -33,7 +33,7 @@
             <br />
             <button class="button button1"onclick="openAllCourses()">See All Courses</button>
             <br />
-            <button class="button button1">Register For Courses</button>
+            <button class="button button1"onclick="openRegistrationCourses()">Register For Courses</button>
         </div>
 
     </div>
@@ -60,6 +60,16 @@
         </div>
     </div>
 
+    <div id="registerCoursesModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
+          <div id="resultRegisterCourses">
+
+          </div>
+        </div>
+    </div>
 
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
