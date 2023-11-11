@@ -47,10 +47,14 @@ function userLogin() {
     xmlhttp.send(JSON.stringify(data));
 }
 
-//might work need data to test
 function openAllCourses() {
-    document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
+    // Show the modal
+    document.getElementById("allCoursesModal").style.display = "block";
+    
+    // Get the result div where you want to display the table
     const resultDiv = document.getElementById("resultAllCourses");
+
+    // API request
     const xmlhttp = new XMLHttpRequest();
     const method = 'GET';
     const url = 'http://127.0.0.1:5000/schoolCourses';
@@ -78,6 +82,7 @@ function openAllCourses() {
     xmlhttp.open(method, url, true);
     xmlhttp.send();
 }
+
 
 
 function openMyCourses(){

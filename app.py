@@ -24,8 +24,8 @@ class Classes(db.Model):
     MaxStudents = db.Column(db.Integer)
 
 class CourseRegistration(db.Model):
-    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.id'), primary_key=True)
+    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.id'))
+    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.id'))
     Grade = db.Column(db.Float, nullable=True)
 
 # Create the database tables
