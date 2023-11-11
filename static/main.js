@@ -47,6 +47,34 @@ function userLogin() {
     xmlhttp.send(JSON.stringify(data));
 }
 
+function registerCourses(){
+    document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
+    const resultDiv = document.getElementById("resultRegister");
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'GET';
+    const url = 'http://127.0.0.1:5000/schoolCourses ';
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
+    xmlhttp.onload = function () {
+
+        // Create an HTML table
+        let tableHTML = '<table border="1">';
+        tableHTML += '<tr><th>Course</th><th>Seats</th></tr>';
+
+        classList = JSON.parse(xmlhttp.response);
+
+        for (let i = 0; i < classList.length; i++) {
+            let course = classList[i].key;
+            let seats = classList[i].value;
+
+            // Creating table rows
+            tableHTML += `<tr><td>${course}</td><td>${seats}</td></tr>`;
+        }
+        tableHTML += '</table>';
+        resultDiv.innerHTML = tableHTML;
+    }
+}
+
 //might work need data to test
 function openAllCourses(){
     document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
@@ -106,6 +134,13 @@ function openMyCourses(){
 
 function closeMyCourses() {
     document.getElementById("myModal").style.display = "none"; // Hide the modal
+}
+
+function closeAllCourses() {
+    document.getElementById("resultAllCourses").style.display = "none"; // Hide the modal
+}
+function closeRegister() {
+    document.getElementById("resultRegiste").style.display = "none"; // Hide the modal
 }
 
 async function postStudent() {

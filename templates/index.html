@@ -31,9 +31,9 @@
         <div class="center">
             <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
             <br />
-            <button class="button button1">See All Courses</button>
+            <button class="button button1" onclick="openAllCourses()">See All Courses</button>
             <br />
-            <button class="button button1">Register For Courses</button>
+            <button class="button button1" onclick="registerCourses()">Register For Courses</button>
         </div>
 
     </div>
@@ -51,10 +51,21 @@
     <!-- See all courses -->
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <span class="close" onclick="closeAllCourses()">&times;</span>
           <!-- Modal content -->
           <!-- <p>Modal Content Here</p> -->
           <div id="resultAllCourses">
+
+          </div>
+        </div>
+    </div>
+
+    <div id="allCoursesModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeRegister()">&times;</span>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
+          <div id="resultRegister">
 
           </div>
         </div>
