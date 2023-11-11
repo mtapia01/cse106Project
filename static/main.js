@@ -6,19 +6,20 @@ function signout() {
     // Redirect the user to the sign-in page or homepage
     window.location.href = "/"; // Redirect to the sign-in page
 }
+var data = { "name": studName, "password": studPass };
 
 function userLogin() {
     let studName = document.getElementById("stuName").value;
     const studPass = document.getElementById("stuPass").value;
 
-    const data = { "name": studName, "password": studPass };
+    data = { "name": studName, "password": studPass };
 
     const xmlhttp = new XMLHttpRequest();
-    const method = 'POST'; // Considering this should be a POST request for login
-    const url = 'http://127.0.0.1:5000/userLogin'; // Assuming this is the login endpoint
+    const method = 'POST'; 
+    const url = 'http://127.0.0.1:5000/userLogin'; 
 
     xmlhttp.open(method, url, true);
-    xmlhttp.setRequestHeader("Content-Type", "application/json"); // Setting the request header
+    xmlhttp.setRequestHeader("Content-Type", "application/json"); 
 
     xmlhttp.onload = function () {
         if (xmlhttp.status === 200) {
@@ -30,7 +31,7 @@ function userLogin() {
             loginBtn.classList.add("hide");
             signUpBtn.classList.add("hide");
 
-            // Assuming you have a variable logOutBtn defined somewhere in your code
+            
             logOutBtn.classList.remove("hide");
             logOutBtn.classList.add("button");
             logOutBtn.classList.add("button1");
@@ -48,7 +49,7 @@ function userLogin() {
 }
 
 function registerCourses(){
-    document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
+    document.getElementById("openCourses").style.display = "block"; // Show the modal
     const resultDiv = document.getElementById("resultRegister");
     const xmlhttp = new XMLHttpRequest();
     const method = 'GET';
@@ -59,20 +60,42 @@ function registerCourses(){
 
         // Create an HTML table
         let tableHTML = '<table border="1">';
-        tableHTML += '<tr><th>Course</th><th>Seats</th></tr>';
+        tableHTML += '<tr><th>Course</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th><th>Action</th></tr>';
 
         classList = JSON.parse(xmlhttp.response);
 
         for (let i = 0; i < classList.length; i++) {
-            let course = classList[i].key;
-            let seats = classList[i].value;
+            let course = classList[i].ClassName;
+            let instructor = classList[i].Instructor;
+            let meetingTime = classList[i].MeetingTime;
+            let enrolledStudents = classList[i].EnrolledStudents;
+            let maxStudents = classList[i].MaxStudents;
 
-            // Creating table rows
-            tableHTML += `<tr><td>${course}</td><td>${seats}</td></tr>`;
+            // Creating table rows with a button for each course
+            tableHTML += `<tr><td>${course}</td><td>${instructor}</td><td>${meetingTime}</td><td>${enrolledStudents}</td><td>${maxStudents}</td><td><button onclick="addCourse('${course}')">Add</button></td></tr>`;
         }
         tableHTML += '</table>';
         resultDiv.innerHTML = tableHTML;
     }
+}
+
+function addCourse(courseName) {
+    const xmlhttp = new XMLHttpRequest();
+
+    const url = 'http://127.0.0.1:5000/addCourse'; 
+    const data = { course: courseName };
+
+    xmlhttp.open(method, url, true);
+    xmlhttp.setRequestHeader('Content-Type', 'application/json');
+    xmlhttp.send(JSON.stringify(data));
+
+    xmlhttp.onload = function () {
+        if (xmlhttp.status === 200) {
+            alert(`Course ${courseName} added successfully!`);
+        } else {
+            alert(`Failed to add course ${courseName}.`);
+        }
+    };
 }
 
 //might work need data to test
@@ -88,16 +111,19 @@ function openAllCourses(){
 
         // Create an HTML table
         let tableHTML = '<table border="1">';
-        tableHTML += '<tr><th>Course</th><th>Seats</th></tr>';
+        tableHTML += '<tr><th>Course</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th></tr>';
 
         classList = JSON.parse(xmlhttp.response);
 
         for (let i = 0; i < classList.length; i++) {
-            let course = classList[i].key;
-            let seats = classList[i].value;
+            let course = classList[i].ClassName;
+            let instructor = classList[i].Instructor;
+            let meetingTime = classList[i].MeetingTime;
+            let enrolledStudents = classList[i].EnrolledStudents;
+            let maxStudents = classList[i].MaxStudents;
 
             // Creating table rows
-            tableHTML += `<tr><td>${course}</td><td>${seats}</td></tr>`;
+            tableHTML += `<tr><td>${course}</td><td>${instructor}</td><td>${meetingTime}</td><td>${enrolledStudents}</td><td>${maxStudents}</td></tr>`;
         }
         tableHTML += '</table>';
         resultDiv.innerHTML = tableHTML;
@@ -116,16 +142,19 @@ function openMyCourses(){
 
         // Create an HTML table
         let tableHTML = '<table border="1">';
-        tableHTML += '<tr><th>Name</th><th>Grade</th></tr>';
+        tableHTML += '<tr><th>Course</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th></tr>';
 
-        const classList = JSON.parse(xmlhttp.response);
+        classList = JSON.parse(xmlhttp.response);
 
         for (let i = 0; i < classList.length; i++) {
-            let person = classList[i].key;
-            let grade = classList[i].value;
+            let course = classList[i].ClassName;
+            let instructor = classList[i].Instructor;
+            let meetingTime = classList[i].MeetingTime;
+            let enrolledStudents = classList[i].EnrolledStudents;
+            let maxStudents = classList[i].MaxStudents;
 
             // Creating table rows
-            tableHTML += `<tr><td>${person}</td><td>${grade}</td></tr>`;
+            tableHTML += `<tr><td>${course}</td><td>${instructor}</td><td>${meetingTime}</td><td>${enrolledStudents}</td><td>${maxStudents}</td></tr>`;
         }
         tableHTML += '</table>';
         resultDiv.innerHTML = tableHTML;
@@ -137,10 +166,10 @@ function closeMyCourses() {
 }
 
 function closeAllCourses() {
-    document.getElementById("resultAllCourses").style.display = "none"; // Hide the modal
+    document.getElementById("allCoursesModal").style.display = "none"; // Hide the modal
 }
 function closeRegister() {
-    document.getElementById("resultRegiste").style.display = "none"; // Hide the modal
+    document.getElementById("openCourses").style.display = "none"; // Hide the modal
 }
 
 async function postStudent() {

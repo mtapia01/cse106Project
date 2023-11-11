@@ -18,7 +18,7 @@ class Users(db.Model, UserMixin):
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
     ClassName = db.Column(db.String(80), nullable=False)
-    Instructor = db.Column(db.Integer, db.ForeignKey('users.id'))
+    Instructor = db.Column(db.String(100), db.ForeignKey('users.UserId'))
     MeetingTime = db.Column(db.String(80), nullable=True)
     EnrolledStudents = db.Column(db.Integer)
     MaxStudents = db.Column(db.Integer)
@@ -29,7 +29,7 @@ class CourseRegistration(db.Model):
     Grade = db.Column(db.Float, nullable=True)
 
 # Create the database tables
-#db.create_all()
+# db.create_all()
 
 
 # Configure Flask-Login
@@ -41,6 +41,7 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
+
 
 
 
@@ -76,22 +77,22 @@ def stuCourses():
     # After finding the user we use their ID to see ALL courses they are enrolled in
     if user:
         user_data = {
-            'id': user.id,
+            'id': user.UserId,
             'name': user.name,
             'password': user.password,
             'type': user.type
             # Add other fields here
         }
-        CourseRegistration.query.filter_by(student_id=user_data['id']).all()
+        
         classListEnrolled = []
-        classListEnrolled.append(user_data)
+        classListEnrolled.append(CourseRegistration.query.filter_by(student_id=user_data['id']).all())
         return jsonify(classListEnrolled)
     else:
         return jsonify({'error': 'Invalid request'})
 
 @app.route('/schoolCourses', methods=['GET'])
 def schoolCourses():
-        Classes.query.all()
+        # Classes.query.all()
 
         return jsonify(Classes.query.all())
 
@@ -101,6 +102,30 @@ def user_signout():
     session.clear()
     # Redirect the user to the sign-in page or homepage
     return redirect('/')  # Redirect to the sign-in page
+
+# class Classes(db.Model):
+#     ClassID = db.Column(db.Integer, primary_key=True)
+#     ClassName = db.Column(db.String(80), nullable=False)
+#     Instructor = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     MeetingTime = db.Column(db.String(80), nullable=True)
+#     EnrolledStudents = db.Column(db.Integer)
+#     MaxStudents = db.Column(db.Integer)
+
+@app.route('/addToCourses')
+def addToCourses():
+    # users = Users.query.first()
+
+    # newClass = Classes(ClassName="CSE106", Instructor= users.UserId, MeetingTime="M", EnrolledStudents=2, MaxStudents=30)
+    users = Users.query.first()
+
+    if users:
+        newClass = Classes(ClassName="CSE106", Instructor=users.UserId, MeetingTime="M", EnrolledStudents=2, MaxStudents=30)
+        db.session.add(newClass)
+        db.session.commit()
+        return jsonify({'message': 'class created successfully'})
+    else:
+        return jsonify({'message': 'No user found to assign as the instructor'})
+
 
 @app.route('/user', methods=['POST'])
 def create_student():
@@ -113,6 +138,7 @@ def create_student():
         return jsonify({'message': 'Student created successfully'})
     else:
         return jsonify({'error': 'Invalid request'})
+
 # @app.route('/grades/<name>', methods=['GET'])
 @app.route('/userLogin', methods=['POST'])
 def userLogin():
@@ -143,10 +169,10 @@ def allUsers():
 
     for user in users:
         user_data = {
-            'id': user.id,
-            'name': user.name,
-            'password': user.password,
-            'type': user.type
+            'id': user.UserId,
+            'name': user.FirstLastName,
+            'password': user.Password,
+            'type': user.Type
             # Add other fields here
         }
         classList.append(user_data)
