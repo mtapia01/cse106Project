@@ -20,7 +20,7 @@ class Users(db.Model, UserMixin):
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
     ClassName = db.Column(db.String(80), nullable=False)
-    Instructor = db.Column(db.Integer, db.ForeignKey('users.id'))
+    InstructorID = db.Column(db.Integer, db.ForeignKey('users.id'))
     MeetingTime = db.Column(db.String(80), nullable=True)
     EnrolledStudents = db.Column(db.Integer)
     MaxStudents = db.Column(db.Integer)
@@ -59,13 +59,13 @@ def get_all_courses():
         course_data = {
             'ClassId': course.ClassID,
             'ClassName': course.ClassName,
-            'Instructor': course.Instructor,  # Assuming this is the instructor's name
+            'Instructor': course.InstructorID,  # Assuming this is the instructor's name
             'MeetingTime': course.MeetingTime
         }
         course_list.append(course_data)
 
     # Render the HTML template and pass the course list
-    return render_template('all_courses.html', courses=course_list)
+    return render_template('index.html', courses=course_list)
 
 
 @app.route('/register', methods=['GET'])
@@ -100,32 +100,32 @@ def teacher():
 
 # Route to display all courses
 # Route to display all courses
-@app.route('/all-courses', methods=['GET'])
-def all_courses():
-    # Query the database to get all course information
-    courses = Classes.query.all()
+# @app.route('/all-courses', methods=['GET'])
+# def all_courses():
+#     # Query the database to get all course information
+#     courses = Classes.query.all()
 
-    # Print the courses for debugging
-    print(courses)
+#     # Print the courses for debugging
+#     print(courses)
 
-    # Create a list to store course data
-    course_list = []
+#     # Create a list to store course data
+#     course_list = []
 
-    # Iterate through the courses and append data to the list
-    for course in courses:
-        course_data = {
-            'ClassId': course.ClassID,
-            'ClassName': course.ClassName,
-            'Instructor': course.Instructor,  # Assuming this is the instructor's name
-            'MeetingTime': course.MeetingTime
-        }
-        course_list.append(course_data)
+#     # Iterate through the courses and append data to the list
+#     for course in courses:
+#         course_data = {
+#             'ClassId': course.ClassID,
+#             'ClassName': course.ClassName,
+#             'Instructor': course.InstructorID,  # Assuming this is the instructor's name
+#             'MeetingTime': course.MeetingTime
+#         }
+#         course_list.append(course_data)
 
-    # Print the course list for debugging
-    print(course_list)
+#     # Print the course list for debugging
+#     print(course_list)
 
-    # Render the HTML template and pass the course list
-    return render_template('all_courses.html', courses=course_list)
+#     # Render the HTML template and pass the course list
+#     return render_template('index.html', courses=course_list)
 
 @app.route('/show-all-courses')
 def show_all_courses():
