@@ -41,8 +41,36 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <body>
+            <h1>All Courses</h1>
+        
+            <!-- Check if there are courses to display -->
+            {% if courses %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class ID</th>
+                            <th>Class Name</th>
+                            <th>Instructor Name</th>
+                            <th>Meeting Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop through courses and display each one -->
+                        {% for course in courses %}
+                            <tr>
+                                <td>{{ course.class_id }}</td>
+                                <td>{{ course.class_name }}</td>
+                                <td>{{ course.instructor_name }}</td>
+                                <td>{{ course.meeting_time }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No courses available.</p>
+            {% endif %}
+        </body>
           <div id="resultAll">
 
           </div>
@@ -59,6 +87,7 @@
           </div>
         </div>
     </div>
+
 
 
 

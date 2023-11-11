@@ -108,12 +108,12 @@ function closeMyCourses() {
     document.getElementById("myModal").style.display = "none"; // Hide the modal
 }
 
-async function postStudent() {
-    const username = document.getElementById("stuName").value;
+function postStudent() {
+    const name = document.getElementById("stuName").value;
     const pass = document.getElementById("stuPass").value;
-    const type = 1;
+    const type = "student";
 
-    const data = { username: username, password: pass, type: type };
+    const data = { name: name, password: pass, type: type };
 
     fetch('http://127.0.0.1:5000/user', {
         method: 'POST',
@@ -122,14 +122,22 @@ async function postStudent() {
         },
         body: JSON.stringify(data),
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
+        .then((response) => {
+            if (response.ok) {
+                // Show a success message in a modal or an alert
+                alert("Registration successful! You can now log in.");
+                // Redirect the user to the login page
+                window.location.href = "/";
+            } else {
+                // Show an error message if registration fails
+                alert("Registration failed. Please try again.");
+            }
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error:', error);
+            // Show an error message if there is an issue with the request
+            alert("There was an error during the registration process.");
         });
 }
-
 function teacherLogin(){}
 function postTeacher(){}

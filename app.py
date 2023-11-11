@@ -74,7 +74,27 @@ def teacher():
 #         classes = Classes.query.filter_by(Instructor=instructor_id).all()
 #         return render_template('teacher_classes.html', classes=classes)
 
+# Route to display all courses
+@app.route('/all-courses', methods=['GET'])
+def all_courses():
+    # Query the database to get all course information
+    courses = Classes.query.all()
 
+    # Create a list to store course data
+    course_list = []
+
+    # Iterate through the courses and append data to the list
+    for course in courses:
+        course_data = {
+            'class_id': course.id,
+            'class_name': course.name,
+            'instructor_name': course.teacher.username,  # Assuming the teacher model has a 'username' attribute
+            'meeting_time': course.meeting_time  # Add the actual attribute for meeting time
+        }
+        course_list.append(course_data)
+
+    # Render the HTML template and pass the course list
+    return render_template('all_courses.html', courses=course_list)
 
 @app.route('/stuCourses', methods=['GET'])
 def stuCourses():
