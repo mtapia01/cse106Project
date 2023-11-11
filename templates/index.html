@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,7 +33,7 @@
         <div class="center">
             <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
             <br />
-            <button class="button button1">See All Courses</button>
+            <button class="button button1" onclick="openAllCourses()">See All Courses</button>
             <br />
             <button class="button button1">Register For Courses</button>
         </div>
@@ -42,7 +44,7 @@
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
           <body>
-            <h1>All Courses</h1>
+            <h1>All My Courses</h1>
         
             <!-- Check if there are courses to display -->
             {% if courses %}
@@ -59,10 +61,10 @@
                         <!-- Loop through courses and display each one -->
                         {% for course in courses %}
                             <tr>
-                                <td>{{ course.class_id }}</td>
-                                <td>{{ course.class_name }}</td>
-                                <td>{{ course.instructor_name }}</td>
-                                <td>{{ course.meeting_time }}</td>
+                                <td>{{ course.ClassId }}</td>
+                                <td>{{ course.ClassName }}</td>
+                                <td>{{ course.Instructor }}</td>
+                                <td>{{ course.MeetingTime }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -70,6 +72,7 @@
             {% else %}
                 <p>No courses available.</p>
             {% endif %}
+            
         </body>
           <div id="resultAll">
 
@@ -79,7 +82,7 @@
     <!-- See all courses -->
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <span class="close" onclick="closeAllCourses()">&times;</span>
           <body>
             <h1>All Courses</h1>
         
@@ -92,16 +95,20 @@
                             <th>Class Name</th>
                             <th>Instructor Name</th>
                             <th>Meeting Time</th>
+                            <!--<th>Enrolled Students</th>-->
+                            <!--<th>Max Students</th>-->
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Loop through courses and display each one -->
                         {% for course in courses %}
                             <tr>
-                                <td>{{ course.class_id }}</td>
-                                <td>{{ course.class_name }}</td>
-                                <td>{{ course.instructor_name }}</td>
-                                <td>{{ course.meeting_time }}</td>
+                                <td>{{ course.ClassId }}</td>
+                                <td>{{ course.ClassName }}</td>
+                                <td>{{ course.Instructor }}</td>
+                                <td>{{ course.MeetingTime }}</td>
+                                <!--<td>{{ course.EnrolledStudents }}</td>-->
+                                <!--<td>{{ course.MaxStudents }}</td>-->
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -109,6 +116,7 @@
             {% else %}
                 <p>No courses available.</p>
             {% endif %}
+            
         </body>
           <div id="resultAllCourses">
 

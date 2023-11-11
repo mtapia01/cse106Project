@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_cors import CORS
 import os
 
 
@@ -8,6 +9,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.getcwd(), 'dbs', 'users.db')
 db = SQLAlchemy(app)
 
+CORS(app)
 
 class Users(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key=True)
@@ -44,6 +46,28 @@ def load_user(user_id):
 
 
 
+@app.route('/all-courses', methods=['GET'])
+def get_all_courses():
+    # Query the database to get all course information
+    courses = Classes.query.all()
+
+    # Create a list to store course data
+    course_list = []
+
+    # Iterate through the courses and append data to the list
+    for course in courses:
+        course_data = {
+            'ClassId': course.ClassID,
+            'ClassName': course.ClassName,
+            'Instructor': course.Instructor,  # Assuming this is the instructor's name
+            'MeetingTime': course.MeetingTime
+        }
+        course_list.append(course_data)
+
+    # Render the HTML template and pass the course list
+    return render_template('all_courses.html', courses=course_list)
+
+
 @app.route('/register', methods=['GET'])
 def display_registration():
     return render_template('registration.html')
@@ -75,10 +99,14 @@ def teacher():
 #         return render_template('teacher_classes.html', classes=classes)
 
 # Route to display all courses
+# Route to display all courses
 @app.route('/all-courses', methods=['GET'])
 def all_courses():
     # Query the database to get all course information
     courses = Classes.query.all()
+
+    # Print the courses for debugging
+    print(courses)
 
     # Create a list to store course data
     course_list = []
@@ -86,15 +114,23 @@ def all_courses():
     # Iterate through the courses and append data to the list
     for course in courses:
         course_data = {
-            'class_id': course.id,
-            'class_name': course.name,
-            'instructor_name': course.teacher.username,  # Assuming the teacher model has a 'username' attribute
-            'meeting_time': course.meeting_time  # Add the actual attribute for meeting time
+            'ClassId': course.ClassID,
+            'ClassName': course.ClassName,
+            'Instructor': course.Instructor,  # Assuming this is the instructor's name
+            'MeetingTime': course.MeetingTime
         }
         course_list.append(course_data)
 
+    # Print the course list for debugging
+    print(course_list)
+
     # Render the HTML template and pass the course list
     return render_template('all_courses.html', courses=course_list)
+
+@app.route('/show-all-courses')
+def show_all_courses():
+    courses = get_all_courses()
+    return render_template('index.html', courses=courses)
 
 @app.route('/stuCourses', methods=['GET'])
 def stuCourses():
@@ -218,8 +254,7 @@ def handle_login():
         flash('Invalid username or password', 'error')
         return redirect(url_for('display_login'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
 
 
 @app.route('/register', methods=['POST'])
@@ -242,3 +277,5 @@ def register():
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
 
+if __name__ == '__main__':
+    app.run(debug=True)
