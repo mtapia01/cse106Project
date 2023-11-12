@@ -75,9 +75,13 @@ def student():
     # Implement student functionality here
     return render_template('student.html')
 
+    
 @app.route('/teacher')
 def teacher():
-    return render_template('teacher.html')
+        instructor_id = 'Susan Walker'
+        teacher_classes = Classes.query.filter_by(Instructor=instructor_id).all()
+        return render_template('teacher.html', teacher_classes=teacher_classes)
+
         
 # @app.route('/teacher/classes')
 # def teacher_classes():
@@ -198,6 +202,31 @@ def get_teachers():
     return jsonify(sorted_teachers_data)
 
 
+@app.route('/teacher/manage_grades/<int:class_id>', methods=['GET', 'POST'])
+def manage_grades(class_id):
+    if request.method == 'GET':
+        # Fetch the class details and enrolled students for the given class_id
+        target_class = Classes.query.get(class_id)
+
+        if target_class:
+            enrolled_students = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
+            return render_template('manage_grades.html', target_class=target_class, enrolled_students=enrolled_students)
+        else:
+            flash('Class not found', 'error')
+            return redirect('/teacher')  # Redirect to teacher page or handle accordingly
+    
+    elif request.method == 'POST':
+        # Handle form submission to update grades
+        data = request.form
+        for student_id, grade in data.items():
+            registration = CourseRegistration.query.filter_by(UserIdFK=student_id, ClassIDFK=class_id).first()
+            if registration:
+                registration.Grade = grade
+                db.session.commit()
+
+        flash('Grades updated successfully', 'success')
+        return redirect(url_for('manage_grades', class_id=class_id))
+
 # @app.route('/createClass', methods=['GET'])
 # def show_create_class_form():
 #     teachers = Users.query.filter_by(Type=2).all()
@@ -239,7 +268,7 @@ def create_class():
     # If the request is not a POST request, you might want to handle it accordingly
     return jsonify({"error": "Invalid request method"}), 405
 
-    
+
 
 @app.route('/signout', methods=['GET'])
 def user_signout():

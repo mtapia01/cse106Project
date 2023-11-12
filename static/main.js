@@ -297,6 +297,45 @@ async function postStudent() {
     }
 }
 
+// Example teacher-related functions in main.js
+
+function getTeacherClasses() {
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'GET';
+    const url = 'http://127.0.0.1:5000/teacher/classes';
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            const teacherClasses = JSON.parse(xmlhttp.responseText);
+
+            // Display the teacher's classes on the page
+            displayTeacherClasses(teacherClasses);
+        }
+    };
+
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
+}
+
+function displayTeacherClasses(classes) {
+    const teacherClassesDiv = document.getElementById('teacherClasses');
+    let classesHTML = '<ul>';
+
+    for (const classData of classes) {
+        classesHTML += `<li>${classData.ClassName}</li>`;
+    }
+
+    classesHTML += '</ul>';
+    teacherClassesDiv.innerHTML = classesHTML;
+}
+
+// Add more functions to manage grades as needed
+
+// Fetch and display teacher's classes when the page loads
+document.addEventListener('DOMContentLoaded', function () {
+    getTeacherClasses();
+});
+
 
 function teacherLogin(){}
 function postTeacher(){}
