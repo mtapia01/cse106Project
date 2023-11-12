@@ -190,6 +190,56 @@ def deregisterCourse():
     
     return jsonify({'status': 'error'})
 
+@app.route('/get_teachers', methods=['GET'])
+def get_teachers():
+    teachers = Users.query.filter_by(Type=2).all()
+    teachers_data = [{'UserId': teacher.UserId, 'FirstLastName': teacher.FirstLastName} for teacher in teachers]
+    sorted_teachers_data = sorted(teachers_data, key=lambda x: x['FirstLastName'])
+    return jsonify(sorted_teachers_data)
+
+
+# @app.route('/createClass', methods=['GET'])
+# def show_create_class_form():
+#     teachers = Users.query.filter_by(Type=2).all()
+#     return render_template('create_class.html', teachers=teachers)
+
+@app.route('/create_class', methods=['POST'])
+def create_class():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        class_id = data.get('class_id')
+        class_name = data.get('class_name')
+        teacher_id = data.get('teacher_id')
+        max_capacity = data.get('max_capacity')
+        meetingTime = data.get('meetingTime')
+        
+        instructor = Users.query.filter_by(UserId=teacher_id).first().FirstLastName
+
+
+        # Validate the input data (you might want to add more validation)
+        if not class_name or not teacher_id or not max_capacity:
+            return jsonify({"error": "Invalid form data. Please fill in all fields"}), 400
+
+        # Create a new class
+        new_class = Classes(
+            ClassID = class_id,
+            ClassName=class_name,
+            Instructor=instructor,
+            MaxStudents=max_capacity,
+            MeetingTime=meetingTime,
+            EnrolledStudents=0  # Initially, no students are enrolled
+        )
+
+        db.session.add(new_class)
+        db.session.commit()
+
+        return jsonify({"message": "Class created successfully"}), 200
+
+    # If the request is not a POST request, you might want to handle it accordingly
+    return jsonify({"error": "Invalid request method"}), 405
+
+    
 
 @app.route('/signout', methods=['GET'])
 def user_signout():

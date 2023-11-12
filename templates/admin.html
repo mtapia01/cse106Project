@@ -8,38 +8,38 @@
     <h1>Admin Dashboard</h1>
 
     <h2>Create a New Class</h2>
-    <form method="POST" action="/create_class">
+    <form onsubmit="return createClass()" id="createClassForm">
+
+        <label for="class_id">Class ID:</label>
+        <input type="text" name="class_id" required>
+
         <label for="class_name">Class Name:</label>
         <input type="text" name="class_name" required>
-        <label for="teacher_id">Teacher ID:</label>
-        <input type="text" name="teacher_id" required>
+    
+        <label for="teacher_id">Teacher:</label>
+        <select name="teacher_id" id="teacherDropdown" required>
+            <!-- Options will be added dynamically using JavaScript -->
+        </select>
+
+        <label for="meetingTime">Meeting Time:</label>
+        <input type="text" name="meetingTime" required>
+
         <label for="max_capacity">Max Capacity:</label>
         <input type="number" name="max_capacity" required>
+    
         <button type="submit">Create Class</button>
     </form>
+    
+    
+        <body onload="openAllCourses()">
+            <h1>All Courses</h1>
+            <div id="resultAllCourses">
+                <!-- The button is removed since the function is triggered automatically -->
+            </div>
+        </body>
 
-    <h2>Classes</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Class Name</th>
-            <th>Teacher ID</th>
-            <th>Max Capacity</th>
-            <th>Actions</th>
-        </tr>
-        {% for class in classes %}
-        <tr>
-            <td>{{ class.id }}</td>
-            <td>{{ class.name }}</td>
-            <td>{{ class.teacher_id }}</td>
-            <td>{{ class.max_capacity }}</td>
-            <td>
-                <a href="/edit_class/{{ class.id }}">Edit</a>
-                <a href="/delete_class/{{ class.id }}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
 
-</body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="static/admin.js"></script>
+    <script src="static/main.js"></script>
 </html>

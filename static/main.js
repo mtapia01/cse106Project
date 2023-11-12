@@ -26,9 +26,9 @@ function userLogin() {
         if (xmlhttp.status === 200) {
             checkUserType(studName, function(type) {
                 if (type == '3') {
-                    window.location.href = 'templates/admin.html';
+                    window.location.href = '/admin';
                 } else if (type == '2') {
-                    window.location.href = 'templates/teacher.html';
+                    window.location.href = '/teacher';
                 } else {
                     let loginDiv = document.getElementById("rcorners1");
                     let loginBtn = document.getElementById("loginBtn");
@@ -86,7 +86,10 @@ function checkUserType(studName, callback) {
 
 function openAllCourses() {
     // Show the modal
-    document.getElementById("allCoursesModal").style.display = "block";
+    if (window.location.href.indexOf("/admin") === -1) {
+        // If not, show the modal
+        document.getElementById("allCoursesModal").style.display = "block";
+    }
     
     // Get the result div where you want to display the table
     const resultDiv = document.getElementById("resultAllCourses");
