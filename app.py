@@ -76,32 +76,8 @@ def student():
     return render_template('student.html')
 
 @app.route('/teacher')
-@login_required
 def teacher():
-    # Assuming you have a function to fetch classes for the logged-in teacher
-    classes = get_teacher_classes(current_user.id)
-
-    # Assuming you have a function to fetch grades for the logged-in teacher
-    grades = get_teacher_grades(current_user.id)
-
-    return render_template('teacher.html', classes=classes, grades=grades)
-
-def get_teacher_classes(user_id):
-    # Assuming you have a User model with a relationship to classes
-    # and the Instructor field in the Classes model corresponds to the teacher's user ID
-    return Classes.query.filter_by(Instructor=user_id).all()
-
-def get_teacher_grades(user_id):
-    # Assuming you have a function to fetch grades for the logged-in teacher
-    # This could involve querying the CourseRegistration table and joining with other necessary tables
-    # Adjust the query based on your database schema
-    # The assumption is that the CourseRegistration table has a relationship with the User and Classes models
-    # to get the student name and class name
-    return CourseRegistration.query\
-        .join(Users, CourseRegistration.UserIdFK == Users.UserId)\
-        .join(Classes, CourseRegistration.ClassIDFK == Classes.ClassID)\
-        .filter(Classes.Instructor == user_id)\
-        .all()
+    return render_template('teacher.html')
         
 # @app.route('/teacher/classes')
 # def teacher_classes():
