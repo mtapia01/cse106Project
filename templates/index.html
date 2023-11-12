@@ -45,34 +45,6 @@
           <span class="close" onclick="closeMyCourses()">&times;</span>
           <body>
             <h1>All My Courses</h1>
-        
-            <!-- Check if there are courses to display -->
-            {% if courses %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Class ID</th>
-                            <th>Class Name</th>
-                            <th>Instructor Name</th>
-                            <th>Meeting Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Loop through courses and display each one -->
-                        {% for course in courses %}
-                            <tr>
-                                <td>{{ course.ClassId }}</td>
-                                <td>{{ course.ClassName }}</td>
-                                <td>{{ course.Instructor }}</td>
-                                <td>{{ course.MeetingTime }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No courses available.</p>
-            {% endif %}
-            
         </body>
           <div id="resultAll">
 
@@ -82,42 +54,10 @@
     <!-- See all courses -->
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeAllCourses()">&times;</span>
+          <span class="close" onclick="closeMyCourses()">&times;</span>
           <body>
             <h1>All Courses</h1>
-        
-            <!-- Check if there are courses to display -->
-            {% if courses %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Class ID</th>
-                            <th>Class Name</th>
-                            <th>Instructor Name</th>
-                            <th>Meeting Time</th>
-                            <!--<th>Enrolled Students</th>-->
-                            <!--<th>Max Students</th>-->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Loop through courses and display each one -->
-                        {% for course in courses %}
-                            <tr>
-                                <td>{{ course.ClassId }}</td>
-                                <td>{{ course.ClassName }}</td>
-                                <td>{{ course.Instructor }}</td>
-                                <td>{{ course.MeetingTime }}</td>
-                                <!--<td>{{ course.EnrolledStudents }}</td>-->
-                                <!--<td>{{ course.MaxStudents }}</td>-->
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No courses available.</p>
-            {% endif %}
-            
-        </body>
+            <body>
           <div id="resultAllCourses">
 
           </div>
@@ -127,8 +67,9 @@
     <div id="registerCoursesModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <body>
+            <h1>Register for Courses</h1>
+            <body>
           <div id="resultRegisterCourses">
 
           </div>

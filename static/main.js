@@ -49,37 +49,88 @@ function userLogin() {
     xmlhttp.send(JSON.stringify(data));
 }
 
-//might work need data to test
 function openAllCourses() {
-    document.getElementById("allCoursesModal").style.display = "block"; // Show the modal
+    // Show the modal
+    document.getElementById("allCoursesModal").style.display = "block";
+    
+    // Get the result div where you want to display the table
     const resultDiv = document.getElementById("resultAllCourses");
 
     // API request
     const xmlhttp = new XMLHttpRequest();
     const method = 'GET';
-    const url = 'http://127.0.0.1:5000/all-courses';  // Correct endpoint
+    const url = 'http://127.0.0.1:5000/schoolCourses';
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+                // Parse the JSON response
+                const classList = JSON.parse(xmlhttp.responseText);
+    
+                // Create an HTML table
+                let tableHTML = '<table border="1">';
+                tableHTML += '<tr><th>Class ID</th><th>Class Name</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th></tr>';
+    
+                for (let i = 0; i < classList.length; i++) {
+                    let classData = classList[i];
+    
+                    // Creating table rows
+                    tableHTML += `<tr><td>${classData.ClassID}</td><td>${classData.ClassName}</td><td>${classData.Instructor}</td><td>${classData.MeetingTime}</td><td>${classData.EnrolledStudents}</td><td>${classData.MaxStudents}</td></tr>`;
+                }
+                tableHTML += '</table>';
+                resultDiv.innerHTML = tableHTML;
+            } else {
+                // Handle errors here, e.g., display an error message
+                resultDiv.innerHTML = 'Error: ' + xmlhttp.status;
+            }
+        }
+    };
+    
 
     xmlhttp.open(method, url, true);
     xmlhttp.send();
+}
 
-    xmlhttp.onload = function () {
-        if (xmlhttp.status === 200) {
-            const classList = JSON.parse(xmlhttp.response);
-            // Rest of your code
-        } else {
-            console.error("Failed to fetch courses:", xmlhttp.statusText);
-            alert("Failed to fetch courses. Please try again later.");
+function openRegistrationCourses() {
+    // Show the modal
+    document.getElementById("registerCoursesModal").style.display = "block";
+
+    // Get the result div where you want to display the table
+    const resultDiv = document.getElementById("resultRegisterCourses");
+
+    // API request
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'GET';
+    const url = 'http://127.0.0.1:5000/schoolCourses';
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+                // Parse the JSON response
+                const classList = JSON.parse(xmlhttp.responseText);
+
+                // Create an HTML table
+                let tableHTML = '<table border="1">';
+                tableHTML += '<tr><th>Class ID</th><th>Class Name</th><th>Instructor</th><th>Meeting Time</th><th>Enrolled Students</th><th>Max Students</th><th>Register</th></tr>';
+
+                for (let i = 0; i < classList.length; i++) {
+                    let classData = classList[i];
+
+                    // Creating table rows with a "Register" button
+                    tableHTML += `<tr><td>${classData.ClassID}</td><td>${classData.ClassName}</td><td>${classData.Instructor}</td><td>${classData.MeetingTime}</td><td>${classData.EnrolledStudents}</td><td>${classData.MaxStudents}</td><td><button onclick="registerForClass(${classData.ClassID})">Register</button></td></tr>`;
+                }
+                tableHTML += '</table>';
+                resultDiv.innerHTML = tableHTML;
+            } else {
+                // Handle errors here, e.g., display an error message
+                resultDiv.innerHTML = 'Error: ' + xmlhttp.status;
+            }
         }
     };
 
-    // Handle network errors
-    xmlhttp.onerror = function () {
-        console.error("Network error occurred.");
-        alert("Failed to fetch courses due to a network error.");
-    };
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
 }
-
-
 
 function registerForClass(classID, button) {
     const username = document.getElementById("stuName").value;
@@ -181,39 +232,20 @@ function closeMyCourses() {
     document.getElementById("registerCoursesModal").style.display = "none";
 }
 
-function closeAllCourses() {
-    document.getElementById("myModal").style.display = "none"; // Hide the modal
-}
-
-function postStudent() {
-    const name = document.getElementById("stuName").value;
+async function postStudent() {
+    const username = document.getElementById("stuName").value;
     const pass = document.getElementById("stuPass").value;
-    const type = "student";
+    const type = 1;
 
-    const data = { name: name, password: pass, type: type };
+    const data = { username: username, password: pass, type: type };
 
-    fetch('http://127.0.0.1:5000/user', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-        .then((response) => {
-            if (response.ok) {
-                // Show a success message in a modal or an alert
-                alert("Registration successful! You can now log in.");
-                // Redirect the user to the login page
-                window.location.href = "/";
-            } else {
-                // Show an error message if registration fails
-                alert("Registration failed. Please try again.");
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            // Show an error message if there is an issue with the request
-            alert("There was an error during the registration process.");
+    try {
+        const response = await fetch('http://127.0.0.1:5000/user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
 
         const responseData = await response.json();
@@ -226,5 +258,7 @@ function postStudent() {
         console.error('Error:', error);
     }
 }
+
+
 function teacherLogin(){}
 function postTeacher(){}
