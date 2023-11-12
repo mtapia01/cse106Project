@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,11 +31,11 @@
     </div>
     <div id="postSignIn" class="hide">
         <div class="center">
-            <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
+            <button class="button button1" onclick="openMyCourses()">See All My Courses</button> <!-- myModal -->
             <br />
-            <button class="button button1">See All Courses</button>
+            <button class="button button1"onclick="openAllCourses()" onclick="openAllCourses()">See All Courses</button>
             <br />
-            <button class="button button1">Register For Courses</button>
+            <button class="button button1"onclick="openRegistrationCourses()">Register For Courses</button>
         </div>
 
     </div>
@@ -41,8 +43,9 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <body>
+            <h1>All My Courses</h1>
+        </body>
           <div id="resultAll">
 
           </div>
@@ -52,9 +55,22 @@
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <body>
+            <h1>All Courses</h1>
+            <body>
           <div id="resultAllCourses">
+
+          </div>
+        </div>
+    </div>
+
+    <div id="registerCoursesModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <body>
+            <h1>Register for Courses</h1>
+            <body>
+          <div id="resultRegisterCourses">
 
           </div>
         </div>
@@ -63,6 +79,8 @@
 
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 
 </body>
 
