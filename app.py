@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
 
 
@@ -8,6 +8,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.getcwd(), 'dbs', 'users.db')
 db = SQLAlchemy(app)
 
+app.secret_key = 'key'
 
 class Users(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key=True)
@@ -75,10 +76,33 @@ def student():
     return render_template('student.html')
 
 @app.route('/teacher')
+@login_required
 def teacher():
-    # Implement teacher functionality here
-    return render_template('teacher.html')
+    # Assuming you have a function to fetch classes for the logged-in teacher
+    classes = get_teacher_classes(current_user.id)
 
+    # Assuming you have a function to fetch grades for the logged-in teacher
+    grades = get_teacher_grades(current_user.id)
+
+    return render_template('teacher.html', classes=classes, grades=grades)
+
+def get_teacher_classes(user_id):
+    # Assuming you have a User model with a relationship to classes
+    # and the Instructor field in the Classes model corresponds to the teacher's user ID
+    return Classes.query.filter_by(Instructor=user_id).all()
+
+def get_teacher_grades(user_id):
+    # Assuming you have a function to fetch grades for the logged-in teacher
+    # This could involve querying the CourseRegistration table and joining with other necessary tables
+    # Adjust the query based on your database schema
+    # The assumption is that the CourseRegistration table has a relationship with the User and Classes models
+    # to get the student name and class name
+    return CourseRegistration.query\
+        .join(Users, CourseRegistration.UserIdFK == Users.UserId)\
+        .join(Classes, CourseRegistration.ClassIDFK == Classes.ClassID)\
+        .filter(Classes.Instructor == user_id)\
+        .all()
+        
 # @app.route('/teacher/classes')
 # def teacher_classes():
 #     if 'user_id' in session and session['user_type'] == 2:  # Ensure the user is a teacher (user type 2)
@@ -322,7 +346,7 @@ def admin():
 
 
 @app.route('/login', methods=['POST'])
-def handle_login():
+def login():
     username = request.form['username']
     password = request.form['password']
     user = Users.query.filter_by(username=username, password=password).first()
