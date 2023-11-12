@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +14,7 @@
 <body class="font mainBackground">
     <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
     <div id="rcorners1" class="center">
-        <p>Student Login</p>
+        <p>Teacher Login</p>
         <div id="rcorners2" class="center">
             <p>Name</p>
             <input id="stuName" placeholder="Name...">
@@ -25,17 +23,17 @@
             <br /><br />
         </div> 
         <br /><br />
-        <button id="loginBtn" class="button button1" onclick="userLogin()">Login</button>
-        <button id="signupBtn" class="button button1" onclick="postStudent()">Sign Up</button>
+        <button id="loginBtn" class="button button1" onclick="teacherLogin()">Login</button>
+        <button id="signupBtn" class="button button1" onclick="postTeacher()">Sign Up</button>
         
     </div>
     <div id="postSignIn" class="hide">
         <div class="center">
-            <button class="button button1" onclick="openMyCourses()">See All My Courses</button> <!-- myModal -->
+            <button class="button button1" onclick="openMyCourses()">See MY Courses</button> myModal
             <br />
-            <button class="button button1"onclick="openAllCourses()" onclick="openAllCourses()">See All Courses</button>
+            <button class="button button1">See All Students</button>
             <br />
-            <button class="button button1"onclick="openRegistrationCourses()">Register For Courses</button>
+            <button class="button button1">Grade Book</button>
         </div>
 
     </div>
@@ -43,9 +41,8 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>All My Courses</h1>
-        </body>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
           <div id="resultAll">
 
           </div>
@@ -55,22 +52,9 @@
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>All Courses</h1>
-            <body>
+          <!-- Modal content -->
+          <!-- <p>Modal Content Here</p> -->
           <div id="resultAllCourses">
-
-          </div>
-        </div>
-    </div>
-
-    <div id="registerCoursesModal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>Register for Courses</h1>
-            <body>
-          <div id="resultRegisterCourses">
 
           </div>
         </div>
@@ -79,8 +63,6 @@
 
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
 
 </body>
 
