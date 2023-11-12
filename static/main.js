@@ -1,4 +1,5 @@
 var courseList;
+var type;
 
 function signout() {
     // Clear any stored authentication data (e.g., tokens, session data, cookies)
@@ -8,7 +9,6 @@ function signout() {
     // Redirect the user to the sign-in page or homepage
     window.location.href = "/"; // Redirect to the sign-in page
 }
-
 function userLogin() {
     let studName = document.getElementById("stuName").value;
     const studPass = document.getElementById("stuPass").value;
@@ -24,20 +24,27 @@ function userLogin() {
 
     xmlhttp.onload = function () {
         if (xmlhttp.status === 200) {
-            let loginDiv = document.getElementById("rcorners1");
-            let loginBtn = document.getElementById("loginBtn");
-            let signUpBtn = document.getElementById("signupBtn");
-            let studentFunction = document.getElementById("postSignIn");
-            loginDiv.classList.add("hide");
-            loginBtn.classList.add("hide");
-            signUpBtn.classList.add("hide");
+            checkUserType(studName, function(type) {
+                if (type == '3') {
+                    window.location.href = 'templates/admin.html';
+                } else if (type == '2') {
+                    window.location.href = 'templates/teacher.html';
+                } else {
+                    let loginDiv = document.getElementById("rcorners1");
+                    let loginBtn = document.getElementById("loginBtn");
+                    let signUpBtn = document.getElementById("signupBtn");
+                    let studentFunction = document.getElementById("postSignIn");
+                    loginDiv.classList.add("hide");
+                    loginBtn.classList.add("hide");
+                    signUpBtn.classList.add("hide");
 
-            // Assuming you have a variable logOutBtn defined somewhere in your code
-            logOutBtn.classList.remove("hide");
-            logOutBtn.classList.add("button");
-            logOutBtn.classList.add("button1");
+                    logOutBtn.classList.remove("hide");
+                    logOutBtn.classList.add("button");
+                    logOutBtn.classList.add("button1");
 
-            studentFunction.classList.remove("hide");
+                    studentFunction.classList.remove("hide");
+                }
+            });
         } else {
             alert("Login failed. Please check your credentials.");
         }
@@ -48,6 +55,34 @@ function userLogin() {
     };
     xmlhttp.send(JSON.stringify(data));
 }
+
+
+function checkUserType(studName, callback) {
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'POST';
+    const url = 'http://127.0.0.1:5000/getType';
+
+    const data = {
+        userName: studName
+    };
+
+    xmlhttp.open(method, url, true);
+    xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xmlhttp.onload = function () {
+        if (xmlhttp.status === 200) {
+            const userType = JSON.parse(xmlhttp.responseText);
+            // Call the callback function with the user type
+            callback(userType);
+        } else {
+            // Handle non-200 HTTP status
+            console.error('Error:', xmlhttp.status);
+        }
+    };
+
+    xmlhttp.send(JSON.stringify(data));
+}
+
 
 function openAllCourses() {
     // Show the modal

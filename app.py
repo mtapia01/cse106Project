@@ -256,6 +256,13 @@ def allUsers():
     return jsonify(classList)
 
 
+@app.route('/getType', methods=['POST'])
+def getType():
+    data = request.get_json()
+    username = data.get('userName')
+    uType = Users.query.filter_by(FirstLastName=username).first().Type
+    return jsonify(uType)
+
 
 @app.route('/admin')
 def admin():
