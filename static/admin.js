@@ -224,3 +224,33 @@ function changeUserCredentials() {
 
     return false; // Prevent the form from submitting
 }
+
+function createUser() {
+    const newUsername = $("#createUserForm input[name='new_username']").val();
+    const newPassword = $("#createUserForm input[name='new_password']").val();
+    const userType = $("#createUserForm input[name='user_type']").val();
+
+    const formData = {
+        new_username: newUsername,
+        new_password: newPassword,
+        user_type: userType
+    };
+
+    $.ajax({
+        url: '/create_user',
+        method: 'POST',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the created user
+            // ...
+        },
+        error: function (error) {
+            console.error('Error creating user:', error);
+        }
+    });
+
+    // Prevent the default form submission
+    return false;
+}

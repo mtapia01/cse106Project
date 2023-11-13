@@ -121,6 +121,24 @@
             <script src="static/main.js"></script>
         </body>
 
+
+<!-- Create New User -->
+<h2>Create New User</h2>
+<form onsubmit="return createUser()" id="createUserForm">
+    <label for="new_username">New Username:</label>
+    <input type="text" name="new_username" required>
+
+    <label for="new_password">New Password:</label>
+    <input type="password" name="new_password" required>
+
+    <label for="user_type">User Type (1=Student, 2=Teacher, 3=Admin):</label>
+    <input type="number" name="user_type" required>
+
+    <button type="submit">Create User</button>
+</form>
+
+
+
                     <!-- Display Users Table -->
     <h2>All Users</h2>
     <table border="1">

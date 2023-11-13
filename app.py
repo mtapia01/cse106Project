@@ -243,11 +243,6 @@ def manage_grades(class_id):
         return redirect(url_for('manage_grades', class_id=class_id))
 
 
-# @app.route('/createClass', methods=['GET'])
-# def show_create_class_form():
-#     teachers = Users.query.filter_by(Type=2).all()
-#     return render_template('create_class.html', teachers=teachers)
-
 @app.route('/create_class', methods=['POST'])
 def create_class():
     if request.method == 'POST':
@@ -406,22 +401,29 @@ def user_signout():
     return redirect('/')  # Redirect to the sign-in page
 
 
-@app.route('/user', methods=['POST'])
-def create_student():
-    if request.method == 'POST':
-        requestStudent = request.get_json()
-        
-        registration = Users.query.filter_by(FirstLastName=requestStudent['username']).first()
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    try:
+        data = request.get_json()
 
-        if registration:
-            return jsonify({'error': 'User Already Exists'})
-        else:
-            newStudent = Users(FirstLastName=requestStudent['username'], Password=requestStudent['password'], Type=requestStudent['type'])
-            db.session.add(newStudent)
-            db.session.commit()
-            return jsonify({'message': 'Student created successfully'})
-    else:
-        return jsonify({'error': 'Invalid request'})
+        username = data.get('new_username')
+        password = data.get('new_password')
+        user_type = data.get('user_type')
+
+        # Check if the username already exists
+        existing_user = Users.query.filter_by(FirstLastName=username).first()
+        if existing_user:
+            return jsonify({'error': 'User already exists'}), 400
+
+        # Create a new user
+        new_user = Users(FirstLastName=username, Password=password, Type=user_type)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({'message': 'User created successfully'}), 201
+    except Exception as e:
+        app.logger.error(f"Error creating user: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
     
 # @app.route('/grades/<name>', methods=['GET'])
 @app.route('/userLogin', methods=['POST'])
@@ -515,3 +517,24 @@ def register():
 
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
+
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Extract data from the request
+        new_username = data.get('new_username')
+        new_password = data.get('new_password')
+        user_type = data.get('user_type')
+
+        # Create a new user
+        new_user = Users(Username=new_username, Password=new_password, Type=user_type)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({'message': 'User created successfully'}), 200
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error creating user: {str(e)}'}), 500
