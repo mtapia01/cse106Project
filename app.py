@@ -1,19 +1,23 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.getcwd(), 'dbs', 'users.db')
 db = SQLAlchemy(app)
 
+app.secret_key = 'key'
 
 class Users(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key=True)
     FirstLastName = db.Column(db.String(80), unique=True, nullable=False)
     Password = db.Column(db.String(120), nullable=False)
     Type = db.Column(db.Integer, nullable=False, default=1)  # Student, Teacher, Admin
+    def to_dict(self):
+        return {
+            'ClassID': self.FirstLastName,
+        }
 
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
@@ -39,6 +43,7 @@ class CourseRegistration(db.Model):
     ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.ClassID'))
     Grade = db.Column(db.Float, nullable=True)
     RegistrationID = db.Column(db.Integer, primary_key=True)
+    # FirstLastName = db.Column(db.Integer, db.ForeignKey('users.UserId'))
     
 
 # Create the database tables
@@ -74,11 +79,14 @@ def student():
     # Implement student functionality here
     return render_template('student.html')
 
+    
 @app.route('/teacher')
 def teacher():
-    # Implement teacher functionality here
-    return render_template('teacher.html')
+        instructor_id = session.get('username')
+        teacher_classes = Classes.query.filter_by(Instructor=instructor_id).all()
+        return render_template('teacher.html', teacher_classes=teacher_classes)
 
+        
 # @app.route('/teacher/classes')
 # def teacher_classes():
 #     if 'user_id' in session and session['user_type'] == 2:  # Ensure the user is a teacher (user type 2)
@@ -198,6 +206,43 @@ def get_teachers():
     return jsonify(sorted_teachers_data)
 
 
+@app.route('/teacher/manage_grades/<int:class_id>', methods=['GET', 'POST'])
+def manage_grades(class_id):
+    if request.method == 'GET':
+        # Fetch the class details and enrolled students for the given class_id
+        target_class = Classes.query.get(class_id)
+
+        if target_class:
+            enrolled_students = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
+            
+            # Fetch user information for each student
+            students_info = []
+            for student in enrolled_students:
+                user = Users.query.get(student.UserIdFK)
+                students_info.append({
+                    'UserIdFK': student.UserIdFK,
+                    'FirstLastName': user.FirstLastName,
+                    'Grade': student.Grade
+                })
+
+            return render_template('manage_grades.html', target_class=target_class, enrolled_students=students_info)
+        else:
+            flash('Class not found', 'error')
+            return redirect('/teacher')  # Redirect to teacher page or handle accordingly
+    
+    elif request.method == 'POST':
+        # Handle form submission to update grades
+        data = request.form
+        for student_id, grade in data.items():
+            registration = CourseRegistration.query.filter_by(UserIdFK=student_id, ClassIDFK=class_id).first()
+            if registration:
+                registration.Grade = grade
+                db.session.commit()
+
+        flash('Grades updated successfully', 'success')
+        return redirect(url_for('manage_grades', class_id=class_id))
+
+
 # @app.route('/createClass', methods=['GET'])
 # def show_create_class_form():
 #     teachers = Users.query.filter_by(Type=2).all()
@@ -239,7 +284,105 @@ def create_class():
     # If the request is not a POST request, you might want to handle it accordingly
     return jsonify({"error": "Invalid request method"}), 405
 
-    
+@app.route('/delete_class/<int:class_id>', methods=['POST'])
+def delete_class(class_id):
+    # Check if the class exists
+    target_class = Classes.query.get(class_id)
+    if not target_class:
+        return jsonify({'message': 'Class not found'}), 404
+
+    try:
+        # Delete class and associated registrations
+        db.session.delete(target_class)
+        CourseRegistration.query.filter_by(ClassIDFK=class_id).delete()
+
+        # Commit the changes
+        db.session.commit()
+
+        return jsonify({'message': 'Class deleted successfully'}), 200
+    except Exception as e:
+        # Handle exceptions, log errors, and rollback changes if needed
+        db.session.rollback()
+        return jsonify({'message': f'Error deleting class: {str(e)}'}), 500
+
+
+@app.route('/get_students_in_class/<int:class_id>', methods=['GET'])
+def get_students_in_class(class_id):
+    try:
+        # Query the registrations for the given class_id
+        registrations = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
+
+        # Extract user IDs from registrations
+        user_ids = [registration.UserIdFK for registration in registrations]
+
+        # Query user details for the extracted user IDs
+        students = Users.query.filter(Users.UserId.in_(user_ids)).all()
+
+        # Prepare the response data
+        student_data = [{'UserId': student.UserId, 'FirstLastName': student.FirstLastName} for student in students]
+
+        return jsonify({'students': student_data}), 200
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error fetching students: {str(e)}'}), 500
+
+
+@app.route('/change_student_classes', methods=['POST'])
+def change_student_classes():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Extract data from the request
+        student_id = data.get('student_id')
+        new_class_id = data.get('new_class_id')
+
+        # Query the registration to update
+        registration = CourseRegistration.query.filter_by(UserIdFK=student_id).first()
+
+        if registration:
+            # Update the class ID
+            registration.ClassIDFK = new_class_id
+            db.session.commit()
+
+            return jsonify({'message': 'Student class updated successfully'}), 200
+        else:
+            return jsonify({'message': 'Student not found'}), 404
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error changing student class: {str(e)}'}), 500
+
+
+@app.route('/change_user_credentials', methods=['POST'])
+def change_user_credentials():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Extract data from the request
+        user_id = data.get('user_id')  # Assuming you have a unique identifier for each user
+        new_username = data.get('new_username')
+        new_password = data.get('new_password')
+
+        # Query the user to update
+        user = Users.query.filter_by(UserId=user_id).first()
+
+        if user:
+            # Update the username and/or password
+            if new_username:
+                user.Username = new_username
+            if new_password:
+                user.Password = new_password
+
+            db.session.commit()
+
+            return jsonify({'message': 'User credentials updated successfully'}), 200
+        else:
+            return jsonify({'message': 'User not found'}), 404
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error changing user credentials: {str(e)}'}), 500
+
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
@@ -248,11 +391,12 @@ def user_signout():
     # Redirect the user to the sign-in page or homepage
     return redirect('/')  # Redirect to the sign-in page
 
+
 @app.route('/user', methods=['POST'])
 def create_student():
     if request.method == 'POST':
         requestStudent = request.get_json()
-
+        
         registration = Users.query.filter_by(FirstLastName=requestStudent['username']).first()
 
         if registration:
@@ -272,6 +416,7 @@ def userLogin():
         data = request.get_json()
         username = data.get('name')
         password = data.get('password')
+        session['username'] = username
 
         if not username or not password:
             return jsonify({'error': 'Please provide both username and password'}), 400
@@ -316,13 +461,13 @@ def getType():
 
 @app.route('/admin')
 def admin():
-    # Implement admin functionality here
-    return render_template('admin.html')
-
+    # Fetch all users from the Users table
+    all_users = Users.query.all()
+    return render_template('admin.html', all_users=all_users)
 
 
 @app.route('/login', methods=['POST'])
-def handle_login():
+def login():
     username = request.form['username']
     password = request.form['password']
     user = Users.query.filter_by(username=username, password=password).first()

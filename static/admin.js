@@ -73,3 +73,84 @@ function createClass() {
     // Send the request
     xhr.send(jsonData);
 }
+
+
+function deleteClass(classId) {
+    const url = `/delete_class/${classId}`;
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the deleted class
+            // ...
+        },
+        error: function (error) {
+            console.error('Error deleting class:', error);
+        }
+    });
+}
+
+function getStudentsInClass(classId) {
+    const url = `/get_students_in_class/${classId}`;
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function (data) {
+            // Handle the retrieved student data, e.g., display in a modal
+            // ...
+        },
+        error: function (error) {
+            console.error('Error fetching students in class:', error);
+        }
+    });
+}
+
+function changeStudentClass(studentId, newClassId) {
+    const url = `/change_student_class/${studentId}`;
+
+    const data = {
+        new_class_id: newClassId
+    };
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the changed class
+            // ...
+        },
+        error: function (error) {
+            console.error('Error changing student class:', error);
+        }
+    });
+}
+
+function changeUserCredentials(userId, newUsername, newPassword) {
+    const url = `/change_user_credentials/${userId}`;
+
+    const data = {
+        new_username: newUsername,
+        new_password: newPassword
+    };
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the changed credentials
+            // ...
+        },
+        error: function (error) {
+            console.error('Error changing user credentials:', error);
+        }
+    });
+}

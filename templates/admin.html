@@ -39,6 +39,80 @@
         </body>
 
 
+
+        <body>
+    
+            <!-- Delete Class -->
+            <h2>Delete Class</h2>
+            <form onsubmit="return deleteClass()" id="deleteClassForm">
+                <label for="class_id_to_delete">Class ID to Delete:</label>
+                <input type="text" name="class_id_to_delete" required>
+                <button type="submit">Delete Class</button>
+            </form>
+        
+            <!-- Change User Credentials -->
+            <h2>Change User Credentials</h2>
+            <form onsubmit="return changeUserCredentials()" id="changeUserCredentialsForm">
+                <label for="user_id_to_change">User ID to Change:</label>
+                <input type="text" name="user_id_to_change" required>
+        
+                <label for="new_username">New Username:</label>
+                <input type="text" name="new_username">
+        
+                <label for="new_password">New Password:</label>
+                <input type="password" name="new_password">
+        
+                <button type="submit">Change User Credentials</button>
+            </form>
+        
+            <!-- Change Student Classes -->
+            <h2>Change Student Classes</h2>
+            <form onsubmit="return changeStudentClasses()" id="changeStudentClassesForm">
+                <label for="user_id_to_change_classes">User ID to Change Classes:</label>
+                <input type="text" name="user_id_to_change_classes" required>
+        
+                <label for="new_class_id">New Class ID:</label>
+                <input type="text" name="new_class_id">
+        
+                <button type="submit">Change Student Classes</button>
+            </form>
+        
+            <!-- Get Students in Class -->
+            <h2>Get Students in Class</h2>
+            <form onsubmit="return getStudentsInClass()" id="getStudentsInClassForm">
+                <label for="class_id_to_get_students">Class ID to Get Students:</label>
+                <input type="text" name="class_id_to_get_students" required>
+                <button type="submit">Get Students in Class</button>
+            </form>
+        
+            <!-- Tables to display results (empty initially) -->
+            <div id="resultDeleteClass"></div>
+            <div id="resultChangeUserCredentials"></div>
+            <div id="resultChangeStudentClasses"></div>
+            <div id="resultGetStudentsInClass"></div>
+        
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="static/admin.js"></script>
+            <script src="static/main.js"></script>
+        </body>
+
+                    <!-- Display Users Table -->
+    <h2>All Users</h2>
+    <table border="1">
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Password</th>
+        </tr>
+        {% for user in all_users %}
+            <tr>
+                <td>{{ user.UserId }}</td>
+                <td>{{ user.FirstLastName }}</td>
+                <td>{{ user.Password }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="static/admin.js"></script>
     <script src="static/main.js"></script>

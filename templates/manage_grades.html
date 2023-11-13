@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Grades</title>
+</head>
+<body>
+    <h1>Manage Grades for {{ target_class.ClassName }}</h1>
+
+    <form method="post">
+        <table border="1">
+            <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Grade</th>
+            </tr>
+            {% for student in enrolled_students %}
+                <tr>
+                    <td>{{ student.UserIdFK }}</td>
+                    <td>{{ student.FirstLastName }}</td>
+                    <td><input type="text" name="{{ student.UserIdFK }}" value="{{ student.Grade }}"></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" value="Update Grades">
+    </form>
+
+    <a href="{{ url_for('teacher') }}">Back to Teacher Page</a>
+</body>
+</html>
