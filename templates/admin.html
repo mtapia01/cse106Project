@@ -8,38 +8,128 @@
     <h1>Admin Dashboard</h1>
 
     <h2>Create a New Class</h2>
-    <form method="POST" action="/create_class">
+    <form onsubmit="return createClass()" id="createClassForm">
+
+        <label for="class_id">Class ID:</label>
+        <input type="text" name="class_id" required>
+
         <label for="class_name">Class Name:</label>
         <input type="text" name="class_name" required>
-        <label for="teacher_id">Teacher ID:</label>
-        <input type="text" name="teacher_id" required>
+    
+        <label for="teacher_id">Teacher:</label>
+        <select name="teacher_id" id="teacherDropdown" required>
+            <!-- Options will be added dynamically using JavaScript -->
+        </select>
+
+        <label for="meetingTime">Meeting Time:</label>
+        <input type="text" name="meetingTime" required>
+
         <label for="max_capacity">Max Capacity:</label>
         <input type="number" name="max_capacity" required>
+    
         <button type="submit">Create Class</button>
     </form>
+    
+    
+        <body onload="openAllCourses()">
+            <h1>All Courses</h1>
+            <div id="resultAllCourses">
+                <!-- The button is removed since the function is triggered automatically -->
+            </div>
+        </body>
 
-    <h2>Classes</h2>
-    <table>
+
+
+        <body>
+    
+            <!-- Delete Class -->
+            <h2>Delete Class</h2>
+            <form onsubmit="return deleteClass()" id="deleteClassForm">
+                <label for="class_id_to_delete">Class ID to Delete:</label>
+                <input type="text" name="class_id_to_delete" required>
+                <button type="submit">Delete Class</button>
+            </form>
+        
+            <!-- Change User Credentials -->
+            <h2>Change User Credentials</h2>
+            <form onsubmit="return changeUserCredentials()" id="changeUserCredentialsForm">
+                <label for="user_id_to_change">User ID to Change:</label>
+                <input type="text" name="user_id_to_change" required>
+        
+                <label for="new_username">New Username:</label>
+                <input type="text" name="new_username">
+        
+                <label for="new_password">New Password:</label>
+                <input type="password" name="new_password">
+        
+                <button type="submit">Change User Credentials</button>
+            </form>
+        
+            <!-- Change Student Classes -->
+            <h2>Change Student Classes</h2>
+            <form onsubmit="return changeStudentClasses()" id="changeStudentClassesForm">
+                <label for="user_id_to_change_classes">User ID to Change Classes:</label>
+                <input type="text" name="user_id_to_change_classes" required>
+        
+                <label for="new_class_id">New Class ID:</label>
+                <input type="text" name="new_class_id">
+        
+                <button type="submit">Change Student Classes</button>
+            </form>
+        
+            <!-- Get Students in Class -->
+            <h2>Get Students in Class</h2>
+            <!-- <form onsubmit="return getStudentsInClass()" id="getStudentsInClassForm"> -->
+                <label for="class_id_to_get_students">Class ID to Get Students:</label>
+                <input type="text" name="class_id_to_get_students" required id="classID">
+                <button onclick="getStudentsInClass()">Get Students in Class</button>
+                
+            <!-- </form> -->
+        
+            <!-- Tables to display results (empty initially) -->
+            <div id="resultDeleteClass"></div>
+            <div id="resultChangeUserCredentials"></div>
+            <div id="resultChangeStudentClasses"></div>
+            <div id="resultGetStudentsInClass">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>Class ID</th>
+                            <th>User ID</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Student data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="static/admin.js"></script>
+            <script src="static/main.js"></script>
+        </body>
+
+                    <!-- Display Users Table -->
+    <h2>All Users</h2>
+    <table border="1">
         <tr>
-            <th>ID</th>
-            <th>Class Name</th>
-            <th>Teacher ID</th>
-            <th>Max Capacity</th>
-            <th>Actions</th>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Courses</th>
         </tr>
-        {% for class in classes %}
-        <tr>
-            <td>{{ class.id }}</td>
-            <td>{{ class.name }}</td>
-            <td>{{ class.teacher_id }}</td>
-            <td>{{ class.max_capacity }}</td>
-            <td>
-                <a href="/edit_class/{{ class.id }}">Edit</a>
-                <a href="/delete_class/{{ class.id }}">Delete</a>
-            </td>
-        </tr>
+        {% for user in all_users %}
+            <tr>
+                <td>{{ user.UserId }}</td>
+                <td>{{ user.FirstLastName }}</td>
+                <td>{{ user.Password }}</td>
+                <td>{{ user.Password }}</td>
+            </tr>
         {% endfor %}
     </table>
 
-</body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="static/admin.js"></script>
+    <script src="static/main.js"></script>
 </html>

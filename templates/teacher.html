@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="font mainBackground">
+    <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
+
+    <!-- Teacher Dashboard Content -->
+    <div id="teacherDashboard" class="center">
+        <h1>Welcome Professor!</h1>
+
+        <!-- Display Classes for the Teacher -->
+        <h2>Your Classes</h2>
+        <div id="teacherClasses">
+            <!-- Use Jinja2 to loop through and display classes -->
+            {% for class in teacher_classes %}
+                <div class="classCard">
+                    <p>Class ID: {{ class.ClassID }}</p>
+                    <p>Class Name: {{ class.ClassName }}</p>
+                    <p>Meeting Time: {{ class.MeetingTime }}</p>
+                    <!-- Add more class details as needed -->
+                </div>
+            {% endfor %}
+        </div>
+    </head>
+    <body>
+        <h2>Your Classes</h2>
+    
+        <ul>
+            {% for class in teacher_classes %}
+                <li>
+                    {{ class.ClassName }} - 
+                    <a href="{{ url_for('manage_grades', class_id=class.ClassID) }}">Manage Grades</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</body>
+
+</html>

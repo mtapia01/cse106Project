@@ -1,35 +1,53 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.getcwd(), 'dbs', 'users.db')
 db = SQLAlchemy(app)
 
+app.secret_key = 'key'
 
 class Users(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key=True)
     FirstLastName = db.Column(db.String(80), unique=True, nullable=False)
     Password = db.Column(db.String(120), nullable=False)
     Type = db.Column(db.Integer, nullable=False, default=1)  # Student, Teacher, Admin
+    def to_dict(self):
+        return {
+            'ClassID': self.FirstLastName,
+        }
 
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
     ClassName = db.Column(db.String(80), nullable=False)
-    Instructor = db.Column(db.String(100), db.ForeignKey('users.UserId'))
+    Instructor = db.Column(db.Integer, db.ForeignKey('users.FirstLastName'))
     MeetingTime = db.Column(db.String(80), nullable=True)
     EnrolledStudents = db.Column(db.Integer)
     MaxStudents = db.Column(db.Integer)
+    
+    def to_dict(self):
+        return {
+            'ClassID': self.ClassID,
+            'ClassName': self.ClassName,
+            'Instructor': self.Instructor,
+            'MeetingTime': self.MeetingTime,
+            'EnrolledStudents': self.EnrolledStudents,
+            'MaxStudents': self.MaxStudents
+        }
 
 class CourseRegistration(db.Model):
-    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.id'), primary_key=True)
+    __tablename__ = 'CourseRegistration'  # Specify the correct table name
+    UserIdFK = db.Column(db.Integer, db.ForeignKey('users.UserId'))
+    ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.ClassID'))
     Grade = db.Column(db.Float, nullable=True)
+    RegistrationID = db.Column(db.Integer, primary_key=True)
+    # FirstLastName = db.Column(db.Integer, db.ForeignKey('users.UserId'))
+    
 
 # Create the database tables
-# db.create_all()
+#db.create_all()
 
 
 # Configure Flask-Login
@@ -37,11 +55,9 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'  # The login route's name
 login_manager.init_app(app)
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
-
 
 
 
@@ -63,38 +79,310 @@ def student():
     # Implement student functionality here
     return render_template('student.html')
 
+    
 @app.route('/teacher')
 def teacher():
-    # Implement teacher functionality here
-    return render_template('teacher.html')
+        instructor_id = session.get('username')
+        teacher_classes = Classes.query.filter_by(Instructor=instructor_id).all()
+        return render_template('teacher.html', teacher_classes=teacher_classes)
 
+        
+# @app.route('/teacher/classes')
+# def teacher_classes():
+#     if 'user_id' in session and session['user_type'] == 2:  # Ensure the user is a teacher (user type 2)
+#         instructor_id = session['user_id']
+#         classes = Classes.query.filter_by(Instructor=instructor_id).all()
+#         return render_template('teacher_classes.html', classes=classes)
 
 @app.route('/stuCourses', methods=['GET'])
 def stuCourses():
-    requestStudent = request.get_json()
-    user = Users.query.filter_by(name=requestStudent['name']).first() #This is assuming the user is signed in idk if this is the way to do this
+    username = request.args.get('name')
     
-    # After finding the user we use their ID to see ALL courses they are enrolled in
+    # After finding the user, use their ID to fetch ALL courses they are enrolled in
+    user = Users.query.filter_by(FirstLastName=username).first()
+
     if user:
-        user_data = {
-            'id': user.UserId,
-            'name': user.name,
-            'password': user.password,
-            'type': user.type
-            # Add other fields here
-        }
-        
+        # Fetch the courses enrolled by the user
+        enrolled_courses = CourseRegistration.query.filter_by(UserIdFK=user.UserId).all()
+
+        # Create a list to store the courses
         classListEnrolled = []
-        classListEnrolled.append(CourseRegistration.query.filter_by(student_id=user_data['id']).all())
+
+        # Iterate through the enrolled courses and add course information to the list
+        for enrollment in enrolled_courses:
+            # Use the correct attribute from the CourseRegistration model
+            class_id = enrollment.ClassIDFK
+
+            course = Classes.query.filter_by(ClassID=class_id).first()
+
+            if course:
+                classListEnrolled.append({
+                    'course_name': course.ClassName,
+                    'grade': enrollment.Grade,
+                    'class_id': class_id  # Add the class_id to the response
+                })
+            else:
+                # Handle the case where the course information is not found
+                classListEnrolled.append({
+                    'error': 'Course information not found',
+                    'grade': enrollment.Grade,
+                    'class_id': class_id  # Add the class_id to the response even if not found
+                })
+
         return jsonify(classListEnrolled)
     else:
-        return jsonify({'error': 'Invalid request'})
+        return jsonify({'error': 'Invalid user'})
+
 
 @app.route('/schoolCourses', methods=['GET'])
 def schoolCourses():
-        # Classes.query.all()
+    if request.method == 'GET':
+        classes = Classes.query.all()
+        classes_list = [cls.to_dict() for cls in classes]
+        return jsonify(classes_list)
+    
+@app.route('/registerClass', methods=['POST'])
+def courseRegister():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('user_id')
 
-        return jsonify(Classes.query.all())
+        user_id = Users.query.filter_by(FirstLastName=username).first().UserId
+        class_id = data.get('class_id')  # Assuming 'class_id' is sent in the JSON payload
+
+        # Check if the user is already registered for the class
+        existing_registration = CourseRegistration.query.filter_by(UserIdFK=user_id, ClassIDFK=class_id).first()
+
+        if existing_registration:
+            # If the user is already registered, remove the registration (deregister)
+            db.session.delete(existing_registration)
+
+            # Decrement the EnrolledStudents count in the Classes table
+            target_class = Classes.query.get(class_id)
+            if target_class and target_class.EnrolledStudents > 0:
+                target_class.EnrolledStudents -= 1
+
+            db.session.commit()
+            return jsonify({'status': 'deregistered'})
+        else:
+            # If the user is not registered, create a new registration
+            new_registration = CourseRegistration(UserIdFK=user_id, ClassIDFK=class_id, Grade=100)
+            db.session.add(new_registration)
+
+            # Increment the EnrolledStudents count in the Classes table
+            target_class = Classes.query.get(class_id)
+            if target_class:
+                target_class.EnrolledStudents += 1
+
+            db.session.commit()
+            return jsonify({'status': 'registered'})
+
+@app.route('/deregisterCourse', methods=['POST'])
+def deregisterCourse():
+    data = request.get_json()
+    class_id = data.get('class_id')
+    name = data.get('name')
+    
+
+    user = Users.query.filter_by(FirstLastName=name).first()
+    if user:
+        registration = CourseRegistration.query.filter_by(UserIdFK=user.UserId, ClassIDFK=class_id).first()
+        if registration:
+            target_class = Classes.query.get(class_id)
+            if target_class and target_class.EnrolledStudents > 0:
+                target_class.EnrolledStudents -= 1
+
+            db.session.delete(registration)
+            db.session.commit()
+            return jsonify({'status': 'success'})
+    
+    return jsonify({'status': 'error'})
+
+@app.route('/get_teachers', methods=['GET'])
+def get_teachers():
+    teachers = Users.query.filter_by(Type=2).all()
+    teachers_data = [{'UserId': teacher.UserId, 'FirstLastName': teacher.FirstLastName} for teacher in teachers]
+    sorted_teachers_data = sorted(teachers_data, key=lambda x: x['FirstLastName'])
+    return jsonify(sorted_teachers_data)
+
+
+@app.route('/teacher/manage_grades/<int:class_id>', methods=['GET', 'POST'])
+def manage_grades(class_id):
+    if request.method == 'GET':
+        # Fetch the class details and enrolled students for the given class_id
+        target_class = Classes.query.get(class_id)
+
+        if target_class:
+            enrolled_students = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
+            
+            # Fetch user information for each student
+            students_info = []
+            for student in enrolled_students:
+                user = Users.query.get(student.UserIdFK)
+                students_info.append({
+                    'UserIdFK': student.UserIdFK,
+                    'FirstLastName': user.FirstLastName,
+                    'Grade': student.Grade
+                })
+
+            return render_template('manage_grades.html', target_class=target_class, enrolled_students=students_info)
+        else:
+            flash('Class not found', 'error')
+            return redirect('/teacher')  # Redirect to teacher page or handle accordingly
+    
+    elif request.method == 'POST':
+        # Handle form submission to update grades
+        data = request.form
+        for student_id, grade in data.items():
+            registration = CourseRegistration.query.filter_by(UserIdFK=student_id, ClassIDFK=class_id).first()
+            if registration:
+                registration.Grade = grade
+                db.session.commit()
+
+        flash('Grades updated successfully', 'success')
+        return redirect(url_for('manage_grades', class_id=class_id))
+
+
+# @app.route('/createClass', methods=['GET'])
+# def show_create_class_form():
+#     teachers = Users.query.filter_by(Type=2).all()
+#     return render_template('create_class.html', teachers=teachers)
+
+@app.route('/create_class', methods=['POST'])
+def create_class():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        class_id = data.get('class_id')
+        class_name = data.get('class_name')
+        teacher_id = data.get('teacher_id')
+        max_capacity = data.get('max_capacity')
+        meetingTime = data.get('meetingTime')
+        
+        instructor = Users.query.filter_by(UserId=teacher_id).first().FirstLastName
+
+
+        # Validate the input data (you might want to add more validation)
+        if not class_name or not teacher_id or not max_capacity:
+            return jsonify({"error": "Invalid form data. Please fill in all fields"}), 400
+
+        # Create a new class
+        new_class = Classes(
+            ClassID = class_id,
+            ClassName=class_name,
+            Instructor=instructor,
+            MaxStudents=max_capacity,
+            MeetingTime=meetingTime,
+            EnrolledStudents=0  # Initially, no students are enrolled
+        )
+
+        db.session.add(new_class)
+        db.session.commit()
+
+        return jsonify({"message": "Class created successfully"}), 200
+
+    # If the request is not a POST request, you might want to handle it accordingly
+    return jsonify({"error": "Invalid request method"}), 405
+
+@app.route('/delete_class/<int:class_id>', methods=['POST'])
+def delete_class(class_id):
+    # Check if the class exists
+    target_class = Classes.query.get(class_id)
+    if not target_class:
+        return jsonify({'message': 'Class not found'}), 404
+
+    try:
+        # Delete class and associated registrations
+        db.session.delete(target_class)
+        CourseRegistration.query.filter_by(ClassIDFK=class_id).delete()
+
+        # Commit the changes
+        db.session.commit()
+
+        return jsonify({'message': 'Class deleted successfully'}), 200
+    except Exception as e:
+        # Handle exceptions, log errors, and rollback changes if needed
+        db.session.rollback()
+        return jsonify({'message': f'Error deleting class: {str(e)}'}), 500
+
+
+@app.route('/get_students_in_class/<int:class_id>', methods=['GET'])
+def get_students_in_class(class_id):
+    try:
+        # Query the registrations for the given class_id
+        registrations = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
+
+        # Extract user IDs from registrations
+        user_ids = [registration.UserIdFK for registration in registrations]
+
+        # Query user details for the extracted user IDs
+        students = Users.query.filter(Users.UserId.in_(user_ids)).all()
+
+        # Prepare the response data
+        student_data = [{'UserId': student.UserId, 'FirstLastName': student.FirstLastName} for student in students]
+
+        return jsonify({'students': student_data}), 200
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error fetching students: {str(e)}'}), 500
+
+
+@app.route('/change_student_classes', methods=['POST'])
+def change_student_classes():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Extract data from the request
+        student_id = data.get('student_id')
+        new_class_id = data.get('new_class_id')
+
+        # Query the registration to update
+        registration = CourseRegistration.query.filter_by(UserIdFK=student_id).first()
+
+        if registration:
+            # Update the class ID
+            registration.ClassIDFK = new_class_id
+            db.session.commit()
+
+            return jsonify({'message': 'Student class updated successfully'}), 200
+        else:
+            return jsonify({'message': 'Student not found'}), 404
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error changing student class: {str(e)}'}), 500
+
+
+@app.route('/change_user_credentials', methods=['POST'])
+def change_user_credentials():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+
+        # Extract data from the request
+        user_id = data.get('user_id')  # Assuming you have a unique identifier for each user
+        new_username = data.get('new_username')
+        new_password = data.get('new_password')
+
+        # Query the user to update
+        user = Users.query.filter_by(UserId=user_id).first()
+
+        if user:
+            # Update the username and/or password
+            if new_username:
+                user.Username = new_username
+            if new_password:
+                user.Password = new_password
+
+            db.session.commit()
+
+            return jsonify({'message': 'User credentials updated successfully'}), 200
+        else:
+            return jsonify({'message': 'User not found'}), 404
+    except Exception as e:
+        # Handle exceptions and log errors if needed
+        return jsonify({'message': f'Error changing user credentials: {str(e)}'}), 500
+
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
@@ -103,49 +391,32 @@ def user_signout():
     # Redirect the user to the sign-in page or homepage
     return redirect('/')  # Redirect to the sign-in page
 
-# class Classes(db.Model):
-#     ClassID = db.Column(db.Integer, primary_key=True)
-#     ClassName = db.Column(db.String(80), nullable=False)
-#     Instructor = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     MeetingTime = db.Column(db.String(80), nullable=True)
-#     EnrolledStudents = db.Column(db.Integer)
-#     MaxStudents = db.Column(db.Integer)
-
-@app.route('/addToCourses')
-def addToCourses():
-    # users = Users.query.first()
-
-    # newClass = Classes(ClassName="CSE106", Instructor= users.UserId, MeetingTime="M", EnrolledStudents=2, MaxStudents=30)
-    users = Users.query.first()
-
-    if users:
-        newClass = Classes(ClassName="CSE106", Instructor=users.UserId, MeetingTime="M", EnrolledStudents=2, MaxStudents=30)
-        db.session.add(newClass)
-        db.session.commit()
-        return jsonify({'message': 'class created successfully'})
-    else:
-        return jsonify({'message': 'No user found to assign as the instructor'})
-
 
 @app.route('/user', methods=['POST'])
 def create_student():
     if request.method == 'POST':
         requestStudent = request.get_json()
-        newStudent = Users(FirstLastName=requestStudent['username'], Password=requestStudent['password'], Type=requestStudent['type'])
-        db.session.add(newStudent)
-        db.session.commit()
-        # jsonify({'message': 'Student added'}), 200
-        return jsonify({'message': 'Student created successfully'})
+        
+        registration = Users.query.filter_by(FirstLastName=requestStudent['username']).first()
+
+        if registration:
+            return jsonify({'error': 'User Already Exists'})
+        else:
+            newStudent = Users(FirstLastName=requestStudent['username'], Password=requestStudent['password'], Type=requestStudent['type'])
+            db.session.add(newStudent)
+            db.session.commit()
+            return jsonify({'message': 'Student created successfully'})
     else:
         return jsonify({'error': 'Invalid request'})
-
+    
 # @app.route('/grades/<name>', methods=['GET'])
 @app.route('/userLogin', methods=['POST'])
 def userLogin():
     if request.method == 'POST':
         data = request.get_json()
-        username = data.get('name')  # Use the correct field name
+        username = data.get('name')
         password = data.get('password')
+        session['username'] = username
 
         if not username or not password:
             return jsonify({'error': 'Please provide both username and password'}), 400
@@ -169,10 +440,10 @@ def allUsers():
 
     for user in users:
         user_data = {
-            'id': user.UserId,
-            'name': user.FirstLastName,
-            'password': user.Password,
-            'type': user.Type
+            'id': user.id,
+            'name': user.name,
+            'password': user.password,
+            'type': user.type
             # Add other fields here
         }
         classList.append(user_data)
@@ -180,16 +451,23 @@ def allUsers():
     return jsonify(classList)
 
 
+@app.route('/getType', methods=['POST'])
+def getType():
+    data = request.get_json()
+    username = data.get('userName')
+    uType = Users.query.filter_by(FirstLastName=username).first().Type
+    return jsonify(uType)
+
 
 @app.route('/admin')
 def admin():
-    # Implement admin functionality here
-    return render_template('admin.html')
-
+    # Fetch all users from the Users table
+    all_users = Users.query.all()
+    return render_template('admin.html', all_users=all_users)
 
 
 @app.route('/login', methods=['POST'])
-def handle_login():
+def login():
     username = request.form['username']
     password = request.form['password']
     user = Users.query.filter_by(username=username, password=password).first()
@@ -223,4 +501,3 @@ def register():
 
     flash('Registration successful. You can now log in.', 'success')
     return redirect(url_for('display_login'))
-

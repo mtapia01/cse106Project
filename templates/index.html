@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,12 +16,12 @@
 <body class="font mainBackground">
     <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
     <div id="rcorners1" class="center">
-        <p>Student Login</p>
+        <p>Login</p>
         <div id="rcorners2" class="center">
             <p>Name</p>
             <input id="stuName" placeholder="Name...">
             <p>Password</p>
-            <input id="stuPass" class="center" placeholder="Password..." type="secret">
+            <input style="-webkit-text-security: circle" id="stuPass" class="center" placeholder="Password..." type="secret">
             <br /><br />
         </div> 
         <br /><br />
@@ -29,11 +31,11 @@
     </div>
     <div id="postSignIn" class="hide">
         <div class="center">
-            <button class="button button1" onclick="openMyCourses()">See All MY Courses</button> <!-- myModal -->
+            <button class="button button1" onclick="openMyCourses()">See All My Courses</button> <!-- myModal -->
             <br />
-            <button class="button button1" onclick="openAllCourses()">See All Courses</button>
+            <button class="button button1"onclick="openAllCourses()" onclick="openAllCourses()">See All Courses</button>
             <br />
-            <button class="button button1" onclick="registerCourses()">Register For Courses</button>
+            <button class="button button1"onclick="openRegistrationCourses()">Register For Courses</button>
         </div>
 
     </div>
@@ -41,8 +43,9 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="closeMyCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <body>
+            <h1>All My Courses</h1>
+        </body>
           <div id="resultAll">
 
           </div>
@@ -51,21 +54,23 @@
     <!-- See all courses -->
     <div id="allCoursesModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeAllCourses()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <body>
+            <h1>All Courses</h1>
+            <body>
           <div id="resultAllCourses">
 
           </div>
         </div>
     </div>
 
-    <div id="openCourses" class="modal">
+    <div id="registerCoursesModal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeRegister()">&times;</span>
-          <!-- Modal content -->
-          <!-- <p>Modal Content Here</p> -->
-          <div id="resultRegister">
+          <span class="close" onclick="closeMyCourses()">&times;</span>
+          <body>
+            <h1>Register for Courses</h1>
+            <body>
+          <div id="resultRegisterCourses">
 
           </div>
         </div>
@@ -74,6 +79,8 @@
 
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 
 </body>
 
