@@ -298,54 +298,6 @@ def get_students_in_class(class_id):
         return jsonify({'message': f'Error fetching students: {str(e)}'}), 500
 
 
-@app.route('/force_enroll_student', methods=['POST'])
-def force_enroll_student():
-    try:
-        data = request.get_json()
-        student_id = data.get('student_id')
-        new_class_id = data.get('new_class_id')
-
-        # Check if the student is already enrolled
-        existing_registration = CourseRegistration.query.filter_by(UserIdFK=student_id).first()
-        if existing_registration:
-            return jsonify({'message': 'Student is already enrolled in a class'}), 400
-
-        # Enroll the student in the new class
-        registration = CourseRegistration(UserIdFK=student_id, ClassIDFK=new_class_id)
-        db.session.add(registration)
-        db.session.commit()
-
-        return jsonify({'message': 'Student enrolled successfully'}), 200
-    except Exception as e:
-        return jsonify({'message': f'Error enrolling student: {str(e)}'}), 500
-
-
-@app.route('/force_unenroll_student_from_class', methods=['POST'])
-def force_unenroll_student_from_class():
-    try:
-        # Get the data from the request
-        data = request.get_json()
-
-        # Extract data from the request
-        student_id = data.get('student_id')
-        class_id = data.get('class_id')
-
-        # Query the registration to update
-        registration = CourseRegistration.query.filter_by(UserIdFK=student_id, ClassIDFK=class_id).first()
-
-        if registration:
-            # Remove the student from the class
-            db.session.delete(registration)
-            db.session.commit()
-
-            return jsonify({'message': 'Student unenrolled from class successfully'}), 200
-        else:
-            return jsonify({'message': 'Student not found in the specified class'}), 404
-    except Exception as e:
-        # Handle exceptions and log errors if needed
-        return jsonify({'message': f'Error unenrolling student from class: {str(e)}'}), 500
-
-
 
 
 @app.route('/change_user_credentials/<int:user_id>', methods=['POST'])
