@@ -51,45 +51,70 @@
             </form>
         
             <!-- Change User Credentials -->
-            <h2>Change User Credentials</h2>
-            <form onsubmit="return changeUserCredentials()" id="changeUserCredentialsForm">
-                <label for="user_id_to_change">User ID to Change:</label>
-                <input type="text" name="user_id_to_change" required>
-        
-                <label for="new_username">New Username:</label>
-                <input type="text" name="new_username">
-        
-                <label for="new_password">New Password:</label>
-                <input type="password" name="new_password">
-        
-                <button type="submit">Change User Credentials</button>
-            </form>
-        
-            <!-- Change Student Classes -->
-            <h2>Change Student Classes</h2>
-            <form onsubmit="return changeStudentClasses()" id="changeStudentClassesForm">
-                <label for="user_id_to_change_classes">User ID to Change Classes:</label>
-                <input type="text" name="user_id_to_change_classes" required>
-        
-                <label for="new_class_id">New Class ID:</label>
-                <input type="text" name="new_class_id">
-        
-                <button type="submit">Change Student Classes</button>
-            </form>
+            <!-- Change User Credentials -->
+<h2>Change User Credentials</h2>
+<form onsubmit="return changeUserCredentials()" id="changeUserCredentialsForm">
+    <label for="user_id_to_change">User ID to Change:</label>
+    <input type="text" name="user_id_to_change" required>
+
+    <label for="new_username">New Username:</label>
+    <input type="text" name="new_username">
+
+    <label for="new_password">New Password:</label>
+    <input type="password" name="new_password">
+
+    <button type="submit">Change User Credentials</button>
+</form>
+
+            <!-- Force Enroll Student -->
+<h2>Force Enroll Student</h2>
+<form onsubmit="return forceEnrollStudent()" id="forceEnrollStudentForm">
+    <label for="user_id_to_force_enroll">User ID to Force Enroll:</label>
+    <input type="text" name="user_id_to_force_enroll" required>
+    <label for="new_class_id_force_enroll">New Class ID:</label>
+    <input type="text" name="new_class_id_force_enroll">
+    <button type="submit">Force Enroll Student</button>
+</form>
+
+<!-- Force Unenroll Student from Class -->
+<h2>Force Unenroll Student from Class</h2>
+<form onsubmit="return forceUnenrollStudentFromClass()" id="forceUnenrollStudentFromClassForm">
+    <label for="user_id_to_force_unenroll_class">User ID to Unenroll:</label>
+    <input type="text" name="user_id_to_force_unenroll_class" required>
+
+    <label for="class_id_to_unenroll_from">Class ID to Unenroll From:</label>
+    <input type="text" name="class_id_to_unenroll_from" required>
+
+    <button type="submit">Force Unenroll Student from Class</button>
+</form>
+
+
         
             <!-- Get Students in Class -->
             <h2>Get Students in Class</h2>
-            <form onsubmit="return getStudentsInClass()" id="getStudentsInClassForm">
+            <!-- <form onsubmit="return getStudentsInClass()" id="getStudentsInClassForm"> -->
                 <label for="class_id_to_get_students">Class ID to Get Students:</label>
-                <input type="text" name="class_id_to_get_students" required>
-                <button type="submit">Get Students in Class</button>
-            </form>
+                <input type="text" name="class_id_to_get_students" required id="classID">
+                <button onclick="getStudentsInClass()">Get Students in Class</button>
         
             <!-- Tables to display results (empty initially) -->
             <div id="resultDeleteClass"></div>
             <div id="resultChangeUserCredentials"></div>
             <div id="resultChangeStudentClasses"></div>
-            <div id="resultGetStudentsInClass"></div>
+            <div id="resultGetStudentsInClass">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>Class ID</th>
+                            <th>User ID</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Student data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
         
             <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
             <script src="static/admin.js"></script>
@@ -103,15 +128,18 @@
             <th>User ID</th>
             <th>Username</th>
             <th>Password</th>
+            <th>Courses</th>
         </tr>
         {% for user in all_users %}
             <tr>
                 <td>{{ user.UserId }}</td>
                 <td>{{ user.FirstLastName }}</td>
                 <td>{{ user.Password }}</td>
+                <td>{{ user.Password }}</td>
             </tr>
         {% endfor %}
     </table>
+
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="static/admin.js"></script>

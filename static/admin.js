@@ -75,6 +75,19 @@ function createClass() {
 }
 
 
+// Wait for the document to be ready before executing the script
+$(document).ready(function () {
+    // Other initialization code...
+
+    // Submit delete class form handler
+    $('#deleteClassForm').submit(function (event) {
+        event.preventDefault(); // Prevent the default form submission
+        const classIdToDelete = $("#deleteClassForm input[name='class_id_to_delete']").val();
+        deleteClass(classIdToDelete);
+    });
+});
+
+// Function to delete a class
 function deleteClass(classId) {
     const url = `/delete_class/${classId}`;
 
@@ -92,15 +105,34 @@ function deleteClass(classId) {
     });
 }
 
-function getStudentsInClass(classId) {
-    const url = `/get_students_in_class/${classId}`;
+function getStudentsInClass() {
+    let classID = document.getElementById("classID").value;
+    // alert(classID)
+    const url = `/get_students_in_class/${classID}`;
 
     $.ajax({
         url: url,
         method: 'GET',
+        dataType: 'json',
         success: function (data) {
-            // Handle the retrieved student data, e.g., display in a modal
-            // ...
+            // Populate the table with the class information
+            $('#studentTable tbody').append(`
+                <tr>
+                    <td>${classID}</td>
+                   
+                </tr>
+            `);
+
+            // Populate the table with the retrieved student data
+            data.students.forEach(function (student) {
+                $('#studentTable tbody').append(`
+                    <tr>
+                        <td></td> <!-- Empty cell for alignment -->
+                        <td>${student.UserId}</td>
+                        <td>${student.FirstLastName}</td>
+                    </tr>
+                `);
+            });
         },
         error: function (error) {
             console.error('Error fetching students in class:', error);
@@ -108,34 +140,70 @@ function getStudentsInClass(classId) {
     });
 }
 
-function changeStudentClass(studentId, newClassId) {
-    const url = `/change_student_class/${studentId}`;
+function forceEnrollStudent() {
+    const studentId = $("#forceEnrollStudentForm input[name='user_id_to_force_enroll']").val();
+    const newClassId = $("#forceEnrollStudentForm input[name='new_class_id_force_enroll']").val();
 
     const data = {
+        student_id: studentId,
         new_class_id: newClassId
     };
 
     $.ajax({
-        url: url,
+        url: '/force_enroll_student',
         method: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the changed class
+            // Optionally, update the UI to reflect the enrollment
             // ...
         },
         error: function (error) {
-            console.error('Error changing student class:', error);
+            console.error('Error enrolling student:', error);
         }
     });
+
+    return false; // Prevent form submission
 }
 
-function changeUserCredentials(userId, newUsername, newPassword) {
-    const url = `/change_user_credentials/${userId}`;
+function forceUnenrollStudentFromClass() {
+    const studentId = $("#forceUnenrollStudentFromClassForm input[name='user_id_to_force_unenroll_class']").val();
+    const classId = $("#forceUnenrollStudentFromClassForm input[name='class_id_to_unenroll_from']").val();
 
     const data = {
-        new_username: newUsername,
+        student_id: studentId,
+        class_id: classId
+    };
+
+    $.ajax({
+        url: '/force_unenroll_student_from_class',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the unenrollment from a specific class
+            // ...
+        },
+        error: function (error) {
+            console.error('Error unenrolling student from class:', error);
+        }
+    });
+
+    return false; // Prevent form submission
+}
+
+// Function to change user credentials
+function changeUserCredentials() {
+    const userIdToChange = $("#changeUserCredentialsForm input[name='user_id_to_change']").val();
+    const newUsername = $("#changeUserCredentialsForm input[name='new_username']").val();
+    const newPassword = $("#changeUserCredentialsForm input[name='new_password']").val();
+
+    const url = `/change_user_credentials/${userIdToChange}`;
+
+    const data = {
+        new_username: newUsername,  // Assuming newUsername contains the new username
         new_password: newPassword
     };
 
@@ -153,4 +221,6 @@ function changeUserCredentials(userId, newUsername, newPassword) {
             console.error('Error changing user credentials:', error);
         }
     });
+
+    return false; // Prevent the form from submitting
 }
