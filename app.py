@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.getcwd(), 'dbs', 'users.db')
 db = SQLAlchemy(app)
@@ -15,6 +14,10 @@ class Users(db.Model, UserMixin):
     FirstLastName = db.Column(db.String(80), unique=True, nullable=False)
     Password = db.Column(db.String(120), nullable=False)
     Type = db.Column(db.Integer, nullable=False, default=1)  # Student, Teacher, Admin
+    def to_dict(self):
+        return {
+            'ClassID': self.FirstLastName,
+        }
 
 class Classes(db.Model):
     ClassID = db.Column(db.Integer, primary_key=True)
@@ -40,6 +43,7 @@ class CourseRegistration(db.Model):
     ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.ClassID'))
     Grade = db.Column(db.Float, nullable=True)
     RegistrationID = db.Column(db.Integer, primary_key=True)
+    # FirstLastName = db.Column(db.Integer, db.ForeignKey('users.UserId'))
     
 
 # Create the database tables
@@ -78,7 +82,7 @@ def student():
     
 @app.route('/teacher')
 def teacher():
-        instructor_id = 'Susan Walker'
+        instructor_id = session.get('username')
         teacher_classes = Classes.query.filter_by(Instructor=instructor_id).all()
         return render_template('teacher.html', teacher_classes=teacher_classes)
 
@@ -210,7 +214,18 @@ def manage_grades(class_id):
 
         if target_class:
             enrolled_students = CourseRegistration.query.filter_by(ClassIDFK=class_id).all()
-            return render_template('manage_grades.html', target_class=target_class, enrolled_students=enrolled_students)
+            
+            # Fetch user information for each student
+            students_info = []
+            for student in enrolled_students:
+                user = Users.query.get(student.UserIdFK)
+                students_info.append({
+                    'UserIdFK': student.UserIdFK,
+                    'FirstLastName': user.FirstLastName,
+                    'Grade': student.Grade
+                })
+
+            return render_template('manage_grades.html', target_class=target_class, enrolled_students=students_info)
         else:
             flash('Class not found', 'error')
             return redirect('/teacher')  # Redirect to teacher page or handle accordingly
@@ -226,6 +241,7 @@ def manage_grades(class_id):
 
         flash('Grades updated successfully', 'success')
         return redirect(url_for('manage_grades', class_id=class_id))
+
 
 # @app.route('/createClass', methods=['GET'])
 # def show_create_class_form():
@@ -301,6 +317,7 @@ def userLogin():
         data = request.get_json()
         username = data.get('name')
         password = data.get('password')
+        session['username'] = username
 
         if not username or not password:
             return jsonify({'error': 'Please provide both username and password'}), 400
