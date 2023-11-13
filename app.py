@@ -287,23 +287,15 @@ def create_class():
 @app.route('/delete_class/<int:class_id>', methods=['POST'])
 def delete_class(class_id):
     # Check if the class exists
-    target_class = Classes.query.get(class_id)
-    if not target_class:
+    course = Classes.query.get(class_id)
+    if not course:
         return jsonify({'message': 'Class not found'}), 404
 
-    try:
-        # Delete class and associated registrations
-        db.session.delete(target_class)
-        CourseRegistration.query.filter_by(ClassIDFK=class_id).delete()
+    # Delete the class
+    db.session.delete(course)
+    db.session.commit()
 
-        # Commit the changes
-        db.session.commit()
-
-        return jsonify({'message': 'Class deleted successfully'}), 200
-    except Exception as e:
-        # Handle exceptions, log errors, and rollback changes if needed
-        db.session.rollback()
-        return jsonify({'message': f'Error deleting class: {str(e)}'}), 500
+    return jsonify({'message': 'Class deleted successfully'}), 200
 
 
 @app.route('/get_students_in_class/<int:class_id>', methods=['GET'])
@@ -353,24 +345,24 @@ def change_student_classes():
         return jsonify({'message': f'Error changing student class: {str(e)}'}), 500
 
 
-@app.route('/change_user_credentials', methods=['POST'])
-def change_user_credentials():
+
+@app.route('/change_user_credentials/<int:user_id>', methods=['POST'])
+def change_user_credentials(user_id):
     try:
         # Get the data from the request
         data = request.get_json()
 
         # Extract data from the request
-        user_id = data.get('user_id')  # Assuming you have a unique identifier for each user
         new_username = data.get('new_username')
         new_password = data.get('new_password')
 
         # Query the user to update
-        user = Users.query.filter_by(UserId=user_id).first()
+        user = Users.query.get(user_id)
 
         if user:
             # Update the username and/or password
             if new_username:
-                user.Username = new_username
+                user.FirstLastName = new_username  # Assuming FirstLastName is the field for usernames
             if new_password:
                 user.Password = new_password
 
@@ -382,7 +374,6 @@ def change_user_credentials():
     except Exception as e:
         # Handle exceptions and log errors if needed
         return jsonify({'message': f'Error changing user credentials: {str(e)}'}), 500
-
 
 @app.route('/signout', methods=['GET'])
 def user_signout():

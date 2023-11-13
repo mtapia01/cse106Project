@@ -75,6 +75,19 @@ function createClass() {
 }
 
 
+// Wait for the document to be ready before executing the script
+$(document).ready(function () {
+    // Other initialization code...
+
+    // Submit delete class form handler
+    $('#deleteClassForm').submit(function (event) {
+        event.preventDefault(); // Prevent the default form submission
+        const classIdToDelete = $("#deleteClassForm input[name='class_id_to_delete']").val();
+        deleteClass(classIdToDelete);
+    });
+});
+
+// Function to delete a class
 function deleteClass(classId) {
     const url = `/delete_class/${classId}`;
 
@@ -92,8 +105,8 @@ function deleteClass(classId) {
     });
 }
 
-function getStudentsInClass(classId) {
-    const url = `/get_students_in_class/${classId}`;
+function getStudentsInClass(ClassId) {
+    const url = `/get_students_in_class/${ClassId}`;
 
     $.ajax({
         url: url,
@@ -131,11 +144,16 @@ function changeStudentClass(studentId, newClassId) {
     });
 }
 
-function changeUserCredentials(userId, newUsername, newPassword) {
-    const url = `/change_user_credentials/${userId}`;
+// Function to change user credentials
+function changeUserCredentials() {
+    const userIdToChange = $("#changeUserCredentialsForm input[name='user_id_to_change']").val();
+    const newUsername = $("#changeUserCredentialsForm input[name='new_username']").val();
+    const newPassword = $("#changeUserCredentialsForm input[name='new_password']").val();
+
+    const url = `/change_user_credentials/${userIdToChange}`;
 
     const data = {
-        new_username: newUsername,
+        new_username: newUsername,  // Assuming newUsername contains the new username
         new_password: newPassword
     };
 
@@ -153,4 +171,6 @@ function changeUserCredentials(userId, newUsername, newPassword) {
             console.error('Error changing user credentials:', error);
         }
     });
+
+    return false; // Prevent the form from submitting
 }
