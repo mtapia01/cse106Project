@@ -2,6 +2,7 @@
 $(document).ready(function () {
     // Fetch teachers and populate the dropdown
     fetchTeachers();
+    fetchStudents();
 
     // Submit form handler
     $('#createClassForm').submit(function (event) {
@@ -16,7 +17,9 @@ function fetchTeachers() {
         method: 'GET',
         dataType: 'json',
         success: function (data) {
-            populateTeacherDropdown(data);
+            const uniqueTeachers = Array.from(new Set(data.map(teacher => teacher.UserId)));
+
+            populateTeacherDropdown(data.filter(teacher => uniqueTeachers.includes(teacher.UserId)));
         },
         error: function (error) {
             console.error('Error fetching teachers:', error);
@@ -26,7 +29,12 @@ function fetchTeachers() {
 
 function populateTeacherDropdown(teachers) {
     const teacherDropdown = $('#teacherDropdown');
-    teachers.forEach(function (teacher) {
+    teacherDropdown.empty(); // Clear the dropdown before populating
+
+    const uniqueTeachers = Array.from(new Set(teachers.map(teacher => teacher.UserId)));
+
+    uniqueTeachers.forEach(function (userId) {
+        const teacher = teachers.find(t => t.UserId === userId);
         const option = $('<option>').val(teacher.UserId).text(teacher.FirstLastName);
         teacherDropdown.append(option);
     });
@@ -194,4 +202,60 @@ function createUser() {
 
     // Prevent the default form submission
     return false;
+}
+
+// Add this function to admin.js
+function forceStudentsIntoClass() {
+    const classID = document.getElementsByName("class_id_to_force_students")[0].value;
+    const studentID = document.getElementById("studentDropdown").value;
+
+    const xmlhttp = new XMLHttpRequest();
+    const method = 'POST';
+    const url = 'http://127.0.0.1:5000/forceStudentsIntoClass';
+
+    const data = {
+        class_id: classID,
+        student_id: studentID
+    };
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            const response = JSON.parse(xmlhttp.responseText);
+            document.getElementById("resultForceStudentsIntoClass").innerHTML = response.message;
+        }
+    };
+
+    xmlhttp.open(method, url, true);
+    xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xmlhttp.send(JSON.stringify(data));
+    return false; // Prevent the form from submitting normally
+}
+
+// Add this function to fetch students
+function fetchStudents() {
+    $.ajax({
+        url: '/get_students',
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            populateStudentDropdown(data);
+        },
+        error: function (error) {
+            console.error('Error fetching students:', error);
+        }
+    });
+}
+
+// Add this function to populate the student dropdown
+function populateStudentDropdown(students) {
+    const studentDropdown = $('#studentDropdown');
+    studentDropdown.empty(); // Clear the dropdown before populating
+
+    const uniqueStudents = Array.from(new Set(students.map(student => student.UserId)));
+
+    uniqueStudents.forEach(function (userId) {
+        const student = students.find(s => s.UserId === userId);
+        const option = $('<option>').val(student.UserId).text(student.FirstLastName);
+        studentDropdown.append(option);
+    });
 }

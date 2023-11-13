@@ -132,6 +132,21 @@
         {% endfor %}
     </table>
 
+    <h2>Force Students into Class</h2>
+<form onsubmit="return forceStudentsIntoClass()" id="forceStudentsIntoClassForm">
+    <label for="class_id_to_force_students">Class ID to Force Students:</label>
+    <input type="text" name="class_id_to_force_students" required>
+    
+    <label for="student_id_to_force">Student ID to Force:</label>
+    <select name="student_id_to_force" id="studentDropdown" required>
+        <!-- Options will be added dynamically using JavaScript -->
+    </select>
+    
+    <button type="submit">Force Students into Class</button>
+</form>
+<div id="resultForceStudentsIntoClass"></div>
+
+
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="static/admin.js"></script>

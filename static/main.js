@@ -289,7 +289,7 @@ async function postStudent() {
         const responseData = await response.json();
 
         // Show an alert with the error message, or "Success" if there's no error
-        alert(responseData.error || 'Success');
+        alert(responseData.error || 'Account created successfully!');
 
         console.log(responseData);
     } catch (error) {

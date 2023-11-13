@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
 import os
 
 app = Flask(__name__)
@@ -14,6 +15,8 @@ class Users(db.Model, UserMixin):
     FirstLastName = db.Column(db.String(80), unique=True, nullable=False)
     Password = db.Column(db.String(120), nullable=False)
     Type = db.Column(db.Integer, nullable=False, default=1)  # Student, Teacher, Admin
+    HashedPasswords = db.Column(db.String(80))
+
     def to_dict(self):
         return {
             'ClassID': self.FirstLastName,
@@ -26,7 +29,6 @@ class Classes(db.Model):
     MeetingTime = db.Column(db.String(80), nullable=True)
     EnrolledStudents = db.Column(db.Integer)
     MaxStudents = db.Column(db.Integer)
-    
     def to_dict(self):
         return {
             'ClassID': self.ClassID,
@@ -193,6 +195,12 @@ def get_teachers():
     sorted_teachers_data = sorted(teachers_data, key=lambda x: x['FirstLastName'])
     return jsonify(sorted_teachers_data)
 
+@app.route('/get_students', methods=['GET'])
+def get_students():
+    students = Users.query.filter_by(Type=1).all()
+    students_data = [{'UserId': student.UserId, 'FirstLastName': student.FirstLastName} for student in students]
+    sorted_students_data = sorted(students_data, key=lambda x: x['FirstLastName'])
+    return jsonify(sorted_students_data)
 
 @app.route('/teacher/manage_grades/<int:class_id>', methods=['GET', 'POST'])
 def manage_grades(class_id):
@@ -298,8 +306,6 @@ def get_students_in_class(class_id):
         return jsonify({'message': f'Error fetching students: {str(e)}'}), 500
 
 
-
-
 @app.route('/change_user_credentials/<int:user_id>', methods=['POST'])
 def change_user_credentials(user_id):
     try:
@@ -316,8 +322,11 @@ def change_user_credentials(user_id):
         if user:
             # Update the username and/or password
             if new_username:
-                user.FirstLastName = new_username  
+                user.FirstLastName = new_username
             if new_password:
+                # Hash the new password before updating
+                hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+                user.HashedPasswords = hashed_password
                 user.Password = new_password
 
             db.session.commit()
@@ -328,6 +337,7 @@ def change_user_credentials(user_id):
     except Exception as e:
         # Handle exceptions and log errors if needed
         return jsonify({'message': f'Error changing user credentials: {str(e)}'}), 500
+    
 
 @app.route('/signout', methods=['GET'])
 def user_signout():
@@ -373,9 +383,10 @@ def userLogin():
         if not username or not password:
             return jsonify({'error': 'Please provide both username and password'}), 400
 
-        user = Users.query.filter_by(FirstLastName=username).first()  # Use the correct field name
+        user = Users.query.filter_by(FirstLastName=username).first()
+
         if user:
-            if user.Password == password:  # Use the correct field name
+            if bcrypt.check_password_hash(user.HashedPasswords, password):
                 return jsonify({'message': 'You have logged in'}), 200
             else:
                 return jsonify({'error': 'Incorrect password'}), 401
@@ -416,60 +427,60 @@ def admin():
     all_users = Users.query.all()
     return render_template('admin.html', all_users=all_users)
 
+bcrypt = Bcrypt(app)
 
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form['username']
-    password = request.form['password']
-    user = Users.query.filter_by(username=username, password=password).first()
-    if user:
-        login_user(user)
-        return redirect('/dashboard')  # Redirect to the user's dashboard
+@app.route('/user', methods=['POST'])
+def create_student():
+    if request.method == 'POST':
+        requestStudent = request.get_json()
+
+        registration = Users.query.filter_by(FirstLastName=requestStudent['username']).first()
+
+        if registration:
+            return jsonify({'error': 'User Already Exists'})
+        else:
+            hashed_password = bcrypt.generate_password_hash(requestStudent['password']).decode('utf-8')
+            newStudent = Users(FirstLastName=requestStudent['username'], Password=hashed_password, Type=requestStudent['type'])
+            db.session.add(newStudent)
+            db.session.commit()
+            return jsonify({'message': 'Student created successfully'})
     else:
-        flash('Invalid username or password', 'error')
-        return redirect(url_for('display_login'))
+        return jsonify({'error': 'Invalid request'})
+
+@app.route('/forceStudentsIntoClass', methods=['POST'])
+def force_students_into_class():
+    if request.method == 'POST':
+        data = request.get_json()
+        class_id = data.get('class_id')
+        student_id = data.get('student_id')
+
+        # Check if the user is of type 1 (student)
+        student = Users.query.filter_by(UserId=student_id, Type=1).first()
+
+        if not student:
+            return jsonify({'status': 'error', 'message': 'Invalid student ID or not a student.'})
+
+        # Check if the class exists
+        target_class = Classes.query.get(class_id)
+
+        if not target_class:
+            return jsonify({'status': 'error', 'message': 'Invalid class ID.'})
+
+        # Check if the student is already enrolled in the class
+        existing_registration = CourseRegistration.query.filter_by(UserIdFK=student_id, ClassIDFK=class_id).first()
+
+        if existing_registration:
+            return jsonify({'status': 'error', 'message': 'Student is already enrolled in the class.'})
+        else:
+            # Create a new registration
+            new_registration = CourseRegistration(UserIdFK=student_id, ClassIDFK=class_id, Grade=100)
+            db.session.add(new_registration)
+
+            # Increment the EnrolledStudents count in the Classes table
+            target_class.EnrolledStudents += 1
+
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Student forced into class.'})
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-@app.route('/register', methods=['POST'])
-def register():
-    username = request.form['username']
-    password = request.form['password']
-    role = request.form['role']
-
-    # Check if a user with the same username already exists
-    existing_user = Users.query.filter_by(username=username).first()
-    if existing_user:
-        flash('Username already exists. Please choose a different one.', 'error')
-        return redirect(url_for('display_registration'))
-
-    # Create a new user and add it to the database
-    new_user = Users(username=username, password=password, role=role)
-    db.session.add(new_user)
-    db.session.commit()
-
-    flash('Registration successful. You can now log in.', 'success')
-    return redirect(url_for('display_login'))
-
-@app.route('/create_user', methods=['POST'])
-def create_user():
-    try:
-        # Get the data from the request
-        data = request.get_json()
-
-        # Extract data from the request
-        new_username = data.get('new_username')
-        new_password = data.get('new_password')
-        user_type = data.get('user_type')
-
-        # Create a new user
-        new_user = Users(Username=new_username, Password=new_password, Type=user_type)
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({'message': 'User created successfully'}), 200
-    except Exception as e:
-        # Handle exceptions and log errors if needed
-        return jsonify({'message': f'Error creating user: {str(e)}'}), 500
