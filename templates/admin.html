@@ -51,7 +51,6 @@
             </form>
         
             <!-- Change User Credentials -->
-            <!-- Change User Credentials -->
 <h2>Change User Credentials</h2>
 <form onsubmit="return changeUserCredentials()" id="changeUserCredentialsForm">
     <label for="user_id_to_change">User ID to Change:</label>
@@ -139,6 +138,7 @@
 
 
 
+
                     <!-- Display Users Table -->
     <h2>All Users</h2>
     <table border="1">
@@ -146,13 +146,11 @@
             <th>User ID</th>
             <th>Username</th>
             <th>Password</th>
-            <th>Courses</th>
         </tr>
         {% for user in all_users %}
             <tr>
                 <td>{{ user.UserId }}</td>
                 <td>{{ user.FirstLastName }}</td>
-                <td>{{ user.Password }}</td>
                 <td>{{ user.Password }}</td>
             </tr>
         {% endfor %}

@@ -77,8 +77,7 @@ function createClass() {
 
 // Wait for the document to be ready before executing the script
 $(document).ready(function () {
-    // Other initialization code...
-
+    
     // Submit delete class form handler
     $('#deleteClassForm').submit(function (event) {
         event.preventDefault(); // Prevent the default form submission
@@ -96,8 +95,6 @@ function deleteClass(classId) {
         method: 'POST',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the deleted class
-            // ...
         },
         error: function (error) {
             console.error('Error deleting class:', error);
@@ -156,8 +153,6 @@ function forceEnrollStudent() {
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the enrollment
-            // ...
         },
         error: function (error) {
             console.error('Error enrolling student:', error);
@@ -183,8 +178,6 @@ function forceUnenrollStudentFromClass() {
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the unenrollment from a specific class
-            // ...
         },
         error: function (error) {
             console.error('Error unenrolling student from class:', error);
@@ -203,7 +196,7 @@ function changeUserCredentials() {
     const url = `/change_user_credentials/${userIdToChange}`;
 
     const data = {
-        new_username: newUsername,  // Assuming newUsername contains the new username
+        new_username: newUsername, 
         new_password: newPassword
     };
 
@@ -214,8 +207,6 @@ function changeUserCredentials() {
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the changed credentials
-            // ...
         },
         error: function (error) {
             console.error('Error changing user credentials:', error);
@@ -243,8 +234,6 @@ function createUser() {
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the created user
-            // ...
         },
         error: function (error) {
             console.error('Error creating user:', error);

@@ -46,9 +46,6 @@ class CourseRegistration(db.Model):
     # FirstLastName = db.Column(db.Integer, db.ForeignKey('users.UserId'))
     
 
-# Create the database tables
-#db.create_all()
-
 
 # Configure Flask-Login
 login_manager = LoginManager()
@@ -86,13 +83,6 @@ def teacher():
         teacher_classes = Classes.query.filter_by(Instructor=instructor_id).all()
         return render_template('teacher.html', teacher_classes=teacher_classes)
 
-        
-# @app.route('/teacher/classes')
-# def teacher_classes():
-#     if 'user_id' in session and session['user_type'] == 2:  # Ensure the user is a teacher (user type 2)
-#         instructor_id = session['user_id']
-#         classes = Classes.query.filter_by(Instructor=instructor_id).all()
-#         return render_template('teacher_classes.html', classes=classes)
 
 @app.route('/stuCourses', methods=['GET'])
 def stuCourses():
