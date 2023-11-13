@@ -297,7 +297,6 @@ async function postStudent() {
     }
 }
 
-// Example teacher-related functions in main.js
 
 function getTeacherClasses() {
     const xmlhttp = new XMLHttpRequest();
@@ -328,8 +327,6 @@ function displayTeacherClasses(classes) {
     classesHTML += '</ul>';
     teacherClassesDiv.innerHTML = classesHTML;
 }
-
-// Add more functions to manage grades as needed
 
 // Fetch and display teacher's classes when the page loads
 document.addEventListener('DOMContentLoaded', function () {

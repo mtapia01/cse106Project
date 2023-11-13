@@ -43,7 +43,6 @@ class CourseRegistration(db.Model):
     ClassIDFK = db.Column(db.Integer, db.ForeignKey('classes.ClassID'))
     Grade = db.Column(db.Float, nullable=True)
     RegistrationID = db.Column(db.Integer, primary_key=True)
-    # FirstLastName = db.Column(db.Integer, db.ForeignKey('users.UserId'))
     
 
 
@@ -73,7 +72,6 @@ def index():
 
 @app.route('/student')
 def student():
-    # Implement student functionality here
     return render_template('student.html')
 
     
@@ -246,8 +244,6 @@ def create_class():
         
         instructor = Users.query.filter_by(UserId=teacher_id).first().FirstLastName
 
-
-        # Validate the input data (you might want to add more validation)
         if not class_name or not teacher_id or not max_capacity:
             return jsonify({"error": "Invalid form data. Please fill in all fields"}), 400
 
@@ -266,7 +262,6 @@ def create_class():
 
         return jsonify({"message": "Class created successfully"}), 200
 
-    # If the request is not a POST request, you might want to handle it accordingly
     return jsonify({"error": "Invalid request method"}), 405
 
 @app.route('/delete_class/<int:class_id>', methods=['POST'])
@@ -300,7 +295,6 @@ def get_students_in_class(class_id):
 
         return jsonify({'students': student_data}), 200
     except Exception as e:
-        # Handle exceptions and log errors if needed
         return jsonify({'message': f'Error fetching students: {str(e)}'}), 500
 
 
@@ -370,7 +364,7 @@ def change_user_credentials(user_id):
         if user:
             # Update the username and/or password
             if new_username:
-                user.FirstLastName = new_username  # Assuming FirstLastName is the field for usernames
+                user.FirstLastName = new_username  
             if new_password:
                 user.Password = new_password
 
@@ -414,8 +408,8 @@ def create_user():
     except Exception as e:
         app.logger.error(f"Error creating user: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-    
-# @app.route('/grades/<name>', methods=['GET'])
+
+
 @app.route('/userLogin', methods=['POST'])
 def userLogin():
     if request.method == 'POST':
@@ -450,7 +444,6 @@ def allUsers():
             'name': user.name,
             'password': user.password,
             'type': user.type
-            # Add other fields here
         }
         classList.append(user_data)
 
