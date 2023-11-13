@@ -121,27 +121,58 @@ function getStudentsInClass(ClassId) {
     });
 }
 
-function changeStudentClass(studentId, newClassId) {
-    const url = `/change_student_class/${studentId}`;
+function forceEnrollStudent() {
+    const studentId = $("#forceEnrollStudentForm input[name='user_id_to_force_enroll']").val();
+    const newClassId = $("#forceEnrollStudentForm input[name='new_class_id_force_enroll']").val();
 
     const data = {
+        student_id: studentId,
         new_class_id: newClassId
     };
 
     $.ajax({
-        url: url,
+        url: '/force_enroll_student',
         method: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: function (data) {
             alert(data.message);
-            // Optionally, update the UI to reflect the changed class
+            // Optionally, update the UI to reflect the enrollment
             // ...
         },
         error: function (error) {
-            console.error('Error changing student class:', error);
+            console.error('Error enrolling student:', error);
         }
     });
+
+    return false; // Prevent form submission
+}
+
+function forceUnenrollStudentFromClass() {
+    const studentId = $("#forceUnenrollStudentFromClassForm input[name='user_id_to_force_unenroll_class']").val();
+    const classId = $("#forceUnenrollStudentFromClassForm input[name='class_id_to_unenroll_from']").val();
+
+    const data = {
+        student_id: studentId,
+        class_id: classId
+    };
+
+    $.ajax({
+        url: '/force_unenroll_student_from_class',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (data) {
+            alert(data.message);
+            // Optionally, update the UI to reflect the unenrollment from a specific class
+            // ...
+        },
+        error: function (error) {
+            console.error('Error unenrolling student from class:', error);
+        }
+    });
+
+    return false; // Prevent form submission
 }
 
 // Function to change user credentials
